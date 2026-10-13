@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1B7F4B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="GoodFood">
+<meta name="author" content="Michael Gerontides">
+<title>GoodFood</title>
+<style>
+:root{
+  --green:#1B7F4B; --green-dk:#146139; --green-lt:#E8F5EE;
+  --amber:#F5A623; --red:#E63E11;
+  --bg:#F6F7F5; --card:#FFFFFF; --text:#1D2420; --muted:#6B7570; --border:#E5E8E6;
+  --ns-a:#038141; --ns-b:#85BB2F; --ns-c:#FECB02; --ns-d:#EE8100; --ns-e:#E63E11;
+  --radius:16px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-size:16px}
+body{max-width:520px;margin:0 auto;display:flex;flex-direction:column;min-height:100dvh}
+button{font:inherit;color:inherit;cursor:pointer}
+[hidden]{display:none!important}
+
+.topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:6px;
+  padding:calc(env(safe-area-inset-top) + 8px) 10px 8px;background:var(--card);border-bottom:1px solid var(--border);min-height:56px}
+.iconbtn{position:relative;width:40px;height:40px;border:none;background:transparent;border-radius:50%;display:grid;place-items:center;flex:0 0 40px}
+.iconbtn:active{background:var(--bg)}
+.iconbtn svg{width:24px;height:24px}
+.cbadge{position:absolute;top:1px;right:0;min-width:18px;height:18px;border-radius:9px;background:var(--red);color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;padding:0 4px}
+.title{flex:1;font-weight:700;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand{flex:1;display:flex;align-items:center;gap:6px;font-weight:800;font-size:20px;color:var(--green)}
+.brand svg{width:24px;height:24px}
+.lang{display:flex;border:1px solid var(--border);border-radius:999px;overflow:hidden;flex:0 0 auto}
+.lang button{border:none;background:transparent;padding:6px 9px;font-size:13px;font-weight:700;color:var(--muted);min-width:38px}
+.lang button.on{background:var(--green);color:#fff}
+
+main{flex:1;display:flex;flex-direction:column}
+.screen{display:none;flex:1;flex-direction:column;padding:16px;padding-bottom:calc(env(safe-area-inset-bottom) + 16px);gap:14px}
+.screen.active{display:flex}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:52px;border:none;border-radius:14px;
+  background:var(--green);color:#fff;font-weight:700;font-size:17px;padding:12px 16px}
+.btn:active{background:var(--green-dk)}
+.btn.secondary{background:var(--card);color:var(--green);border:1.5px solid var(--green)}
+.btn.on{background:var(--green-lt)}
+.btn svg{width:22px;height:22px}
+.link{background:none;border:none;color:var(--green);font-weight:600;padding:8px;text-decoration:underline}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.center{text-align:center}
+.credit{font-size:11px;color:#A3ABA6;text-align:center;letter-spacing:.2px}
+
+#s-welcome{justify-content:center;align-items:center;text-align:center;gap:18px}
+.hero-logo{display:flex;align-items:center;gap:10px;font-size:36px;font-weight:800;color:var(--green)}
+.hero-logo svg{width:44px;height:44px}
+.hero-art{font-size:64px;line-height:1}
+#s-welcome p{max-width:340px;margin:0}
+
+#s-scanner{padding:0;gap:0;background:#000}
+.camwrap{position:relative;flex:1;min-height:60vh;overflow:hidden;background:#000}
+#video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.scanhint{position:absolute;top:16px;left:0;right:0;text-align:center;color:#fff;font-weight:600;text-shadow:0 1px 4px rgba(0,0,0,.7);padding:0 16px}
+.frame{position:absolute;left:50%;top:45%;width:72%;max-width:320px;aspect-ratio:1.4;transform:translate(-50%,-50%)}
+.frame i{position:absolute;width:34px;height:34px;border:4px solid #4ADE80}
+.frame i:nth-child(1){top:0;left:0;border-right:none;border-bottom:none;border-radius:10px 0 0 0}
+.frame i:nth-child(2){top:0;right:0;border-left:none;border-bottom:none;border-radius:0 10px 0 0}
+.frame i:nth-child(3){bottom:0;left:0;border-right:none;border-top:none;border-radius:0 0 0 10px}
+.frame i:nth-child(4){bottom:0;right:0;border-left:none;border-top:none;border-radius:0 0 10px 0}
+.frame::after{content:"";position:absolute;left:6%;right:6%;height:2px;background:#4ADE80;top:50%;animation:sweep 1.8s ease-in-out infinite;box-shadow:0 0 8px #4ADE80}
+@keyframes sweep{0%,100%{top:15%}50%{top:85%}}
+#torchBtn{position:absolute;top:56px;right:16px;background:rgba(0,0,0,.5);color:#fff}
+.scanbar{padding:14px 16px calc(env(safe-area-inset-bottom) + 14px);background:#111;display:flex;flex-direction:column;gap:8px;align-items:center}
+.scanbar .btn{background:#2A2F2C}
+.scanbar .small{color:#BFC5C1}
+.camerror{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:14px;padding:24px;text-align:center;color:#fff;background:#111}
+
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--card);width:100%;max-width:520px;border-radius:20px 20px 0 0;padding:20px 16px calc(env(safe-area-inset-bottom) + 20px);display:flex;flex-direction:column;gap:12px}
+.sheet h3{margin:0}
+.sheet input{font-size:20px;padding:14px;border:1.5px solid var(--border);border-radius:12px;width:100%;letter-spacing:1px}
+.sheet input:focus{outline:none;border-color:var(--green)}
+.row{display:flex;gap:10px}
+
+#s-loading{justify-content:center;align-items:center;text-align:center}
+.spinner-ic{width:96px;height:96px;border-radius:50%;background:var(--green-lt);display:grid;place-items:center}
+.spinner-ic svg{width:44px;height:44px;color:var(--green);animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.12)}}
+.progress{width:100%;max-width:320px;height:8px;background:var(--border);border-radius:99px;overflow:hidden}
+.progress div{height:100%;width:0;background:var(--green);transition:width .3s}
+.steps{list-style:none;padding:0;margin:0;text-align:left;display:flex;flex-direction:column;gap:10px}
+.steps li{display:flex;align-items:center;gap:10px;color:var(--muted)}
+.steps li::before{content:"";width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex:0 0 20px}
+.steps li.done{color:var(--text)}
+.steps li.done::before{background:var(--green) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3'%3E%3Cpath d='M5 12l5 5L20 7'/%3E%3C/svg%3E") center/14px no-repeat;border-color:var(--green)}
+
+.prod{display:flex;gap:14px;align-items:flex-start}
+.prod img,.thumb{width:92px;height:92px;object-fit:contain;border-radius:12px;background:#fff;border:1px solid var(--border);flex:0 0 92px}
+.thumb{display:grid;place-items:center;font-size:36px}
+.prod h2{margin:0 0 4px;font-size:20px;line-height:1.2}
+.chip{display:inline-block;background:var(--bg);border:1px solid var(--border);border-radius:99px;padding:3px 10px;font-size:12px;margin:4px 4px 0 0}
+.scorecard{display:flex;gap:16px;align-items:center}
+.ring{--v:0;--c:var(--green);width:96px;height:96px;border-radius:50%;flex:0 0 96px;display:grid;place-items:center;
+  background:conic-gradient(var(--c) calc(var(--v)*1%), var(--border) 0)}
+.ring>div{width:76px;height:76px;border-radius:50%;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring b{font-size:30px;line-height:1}
+.ring span{font-size:12px;color:var(--muted)}
+.band{font-size:22px;font-weight:800;margin:0 0 4px}
+.badges{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.badge{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 6px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px}
+.badge .lbl{font-size:12px;font-weight:700;color:var(--muted)}
+.badge .val{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:20px}
+.badge .sub{font-size:11px;color:var(--muted);line-height:1.2}
+.nutr{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.nutr div{background:var(--bg);border-radius:10px;padding:8px 4px;text-align:center;border-bottom:4px solid transparent}
+.nutr b{display:block;font-size:15px}
+.nutr span{font-size:11px;color:var(--muted)}
+.nutr .lv-low{border-bottom-color:#2E9E5B}.nutr .lv-med{border-bottom-color:var(--amber)}.nutr .lv-high{border-bottom-color:var(--red)}
+.note{background:#FFF7E6;border:1px solid #F5D9A0;border-radius:12px;padding:10px 12px;font-size:13px}
+.disclaimer{font-size:12px;color:var(--muted);text-align:center}
+h3.sec{margin:4px 0 0;font-size:16px}
+.card h3.sec{margin:0 0 10px}
+
+.why{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.why li{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.35}
+.why .ic{flex:0 0 20px;height:20px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;font-size:14px;line-height:1}
+.ri{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;margin-top:8px}
+.ri .lab{display:flex;justify-content:space-between;font-size:12px}
+.bar{height:6px;background:var(--border);border-radius:9px;overflow:hidden;margin-top:3px}
+.bar i{display:block;height:100%}
+.claim{display:flex;gap:10px;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border)}
+.claim .st{font-size:12px;font-weight:700;text-align:right;flex:0 0 40%}
+select.pick{width:100%;margin-top:10px;padding:12px;border-radius:12px;border:1.5px solid var(--border);font:inherit;font-size:15px;background:#fff;color:var(--text)}
+
+.list{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.item{display:flex;align-items:center;gap:12px;padding:12px 14px;border:none;border-bottom:1px solid var(--border);background:transparent;text-align:left;width:100%}
+.item:last-child{border-bottom:none}
+.item:active{background:var(--bg)}
+.item img,.item .thumb{width:52px;height:52px;flex:0 0 52px;font-size:22px}
+.item .grow{flex:1;min-width:0}
+.item .name{font-weight:600;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.pill{min-width:48px;padding:6px 8px;border-radius:12px;text-align:center;font-weight:800;display:inline-block}
+.pill small{display:block;font-size:10px;font-weight:600;opacity:.8}
+.add-code{font-weight:800;width:56px;flex:0 0 56px}
+.risk{display:flex;align-items:center;gap:6px;font-size:13px;white-space:nowrap}
+.dot{width:10px;height:10px;border-radius:50%}
+.reason{font-size:13px;color:var(--muted);margin-top:4px}
+.okbox{display:flex;gap:12px;align-items:center;background:var(--green-lt);border-radius:14px;padding:12px}
+.okbox svg{width:32px;height:32px;color:var(--green);flex:0 0 32px}
+.ingr{line-height:1.5;font-size:15px}
+
+.bestcard{border-left:5px solid var(--green)}
+.cmpwrap{overflow-x:auto;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);-webkit-overflow-scrolling:touch}
+table.cmp{border-collapse:separate;border-spacing:0;font-size:13px;min-width:100%}
+table.cmp th,table.cmp td{padding:8px 6px;border-bottom:1px solid var(--border);text-align:center;vertical-align:middle;min-width:100px}
+table.cmp tr:last-child td{border-bottom:none}
+table.cmp th:first-child,table.cmp td:first-child{position:sticky;left:0;background:var(--card);text-align:left;min-width:88px;max-width:96px;font-weight:600;color:var(--muted);font-size:12px;z-index:1;border-right:1px solid var(--border)}
+table.cmp td.best{background:var(--green-lt);font-weight:800}
+table.cmp img,table.cmp .thumb{width:56px;height:56px;flex:none;margin:0 auto 4px;font-size:22px;display:grid}
+table.cmp .pname{font-size:12px;font-weight:600;line-height:1.2;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+table.cmp input{width:76px;padding:8px 4px;border:1.5px solid var(--border);border-radius:8px;font:inherit;font-size:16px;text-align:center}
+.rm{border:none;background:none;color:var(--muted);font-size:12px;text-decoration:underline;padding:4px}
+.mini{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:8px;color:#fff;font-weight:800}
+
+#s-notfound{align-items:stretch;text-align:center}
+.nf-ic{font-size:56px;margin-top:12px}
+
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 90px);transform:translateX(-50%);background:#1D2420;color:#fff;
+  padding:10px 16px;border-radius:12px;font-size:14px;z-index:60;max-width:90%;text-align:center;opacity:0;transition:opacity .25s;pointer-events:none}
+#toast.show{opacity:1}
+.form{display:flex;flex-direction:column;gap:12px}
+.field label{display:block;font-size:13px;font-weight:700;margin-bottom:4px}
+.field input{width:100%;padding:12px;border:1.5px solid var(--border);border-radius:12px;font:inherit;font-size:16px;background:#fff;color:var(--text)}
+.field input:focus{outline:none;border-color:var(--green)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg{display:grid;grid-template-columns:1fr 1fr;border:1.5px solid var(--green);border-radius:12px;overflow:hidden}
+.seg button{border:none;background:#fff;color:var(--green);padding:10px 6px;font-weight:700;font-size:14px}
+.seg button.on{background:var(--green);color:#fff}
+.req{color:var(--red)}
+.chk{display:flex;gap:10px;align-items:center;font-size:14px}
+.chk input{width:22px;height:22px;accent-color:var(--green)}
+.userbox{background:#EEF4FF;border:1px solid #C9DAF8;border-radius:12px;padding:12px;font-size:13px;display:flex;flex-direction:column;gap:10px}
+.btn.small-btn{min-height:44px;font-size:15px}
+.ucode{display:inline-block;font-size:11px;font-weight:700;color:#3367D6;background:#EEF4FF;border-radius:6px;padding:1px 6px;margin-left:4px}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <button class="iconbtn" id="backBtn" aria-label="Back" hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
+  <div class="brand" id="brand">
+    <svg viewBox="0 0 24 24" fill="#1B7F4B"><path d="M20 3C10 3 4 8 4 15c0 2 .6 3.7 1.6 5l1.5-1.5C9 14 13 10 17 8c-4 3-7.5 7-9 11.5 1.2.6 2.5.9 4 .9 7 0 9-8 8-17.4z"/></svg>
+    GoodFood
+  </div>
+  <div class="title" id="title" hidden></div>
+  <div class="lang" role="group" aria-label="Language">
+    <button id="langEN" type="button">EN</button>
+    <button id="langGR" type="button">GR</button>
+  </div>
+  <button class="iconbtn" id="compareBtn" aria-label="Compare">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M5 7h14"/><path d="M5 7l-3 7a3 3 0 0 0 6 0z"/><path d="M19 7l-3 7a3 3 0 0 0 6 0z"/><path d="M8 21h8"/></svg>
+    <span class="cbadge" id="cmpBadge" hidden>0</span>
+  </button>
+  <button class="iconbtn" id="historyBtn" aria-label="History">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>
+  </button>
+</header>
+
+<main>
+  <!-- 1. Welcome -->
+  <section class="screen" id="s-welcome">
+    <div class="hero-logo">
+      <svg viewBox="0 0 24 24" fill="#1B7F4B"><path d="M20 3C10 3 4 8 4 15c0 2 .6 3.7 1.6 5l1.5-1.5C9 14 13 10 17 8c-4 3-7.5 7-9 11.5 1.2.6 2.5.9 4 .9 7 0 9-8 8-17.4z"/></svg>GoodFood
+    </div>
+    <div class="muted" data-i18n="tagline"></div>
+    <div class="hero-art" aria-hidden="true">🥦🍅🧀🥛</div>
+    <p data-i18n="welcomeText"></p>
+    <button class="btn" id="startBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+      <span data-i18n="allowCamera"></span>
+    </button>
+    <div class="small muted" data-i18n="privacy"></div>
+    <button class="link" id="aboutLink" data-i18n="aboutLink"></button>
+    <div class="credit" data-i18n="credit"></div>
+  </section>
+
+  <!-- 2. Scanner -->
+  <section class="screen" id="s-scanner">
+    <div class="camwrap">
+      <video id="video" playsinline muted autoplay></video>
+      <div class="scanhint" data-i18n="scanHint"></div>
+      <div class="frame"><i></i><i></i><i></i><i></i></div>
+      <button class="iconbtn" id="torchBtn" aria-label="Flashlight" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 2h10l-2 6H9z"/><path d="M9 8h6v13H9z"/><path d="M12 12v3"/></svg>
+      </button>
+      <div class="camerror" id="camError" hidden>
+        <div style="font-size:44px">📷</div>
+        <div data-i18n="camError"></div>
+        <button class="btn" id="retryCam" style="max-width:260px" data-i18n="retry"></button>
+      </div>
+    </div>
+    <div class="scanbar">
+      <button class="btn" id="manualBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg>
+        <span data-i18n="typeManual"></span>
+      </button>
+      <div class="small" data-i18n="supports"></div>
+    </div>
+  </section>
+
+  <!-- 3. Loading -->
+  <section class="screen" id="s-loading">
+    <div class="spinner-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></div>
+    <h2 style="margin:0" data-i18n="loadingTitle"></h2>
+    <div class="muted" data-i18n="loadingSub"></div>
+    <div class="progress"><div id="progBar"></div></div>
+    <ul class="steps" id="steps">
+      <li data-i18n="step1"></li><li data-i18n="step2"></li><li data-i18n="step3"></li><li data-i18n="step4"></li>
+    </ul>
+  </section>
+
+  <section class="screen" id="s-result"></section>
+  <section class="screen" id="s-additives"></section>
+  <section class="screen" id="s-alternatives"></section>
+  <section class="screen" id="s-compare"></section>
+
+  <!-- Not found -->
+  <section class="screen" id="s-notfound">
+    <div class="nf-ic">🔍</div>
+    <h2 style="margin:0" data-i18n="notFoundTitle"></h2>
+    <div class="muted" data-i18n="notFoundText"></div>
+    <div class="muted small" id="nfCode"></div>
+    <button class="btn" id="nfEntry">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+      <span data-i18n="scoreYourself"></span></button>
+    <div class="small muted" data-i18n="scoreYourselfSub"></div>
+    <div style="text-align:left;font-weight:700" data-i18n="whatCanDo"></div>
+    <div class="list" style="text-align:left">
+      <button class="item" id="nfScan"><span class="grow" data-i18n="scanAgain"></span>›</button>
+      <button class="item" id="nfManual"><span class="grow" data-i18n="enterManual"></span>›</button>
+      <a class="item" id="nfAdd" target="_blank" rel="noopener" style="color:inherit;text-decoration:none"><span class="grow" data-i18n="addOff"></span>↗</a>
+    </div>
+    <div class="card small" style="text-align:left"><b data-i18n="greekTitle"></b><div class="muted" style="margin-top:6px;line-height:1.45" data-i18n="greekText"></div></div>
+  </section>
+  <section class="screen" id="s-entry"></section>
+
+  <section class="screen" id="s-history"></section>
+
+  <!-- About -->
+  <section class="screen" id="s-about">
+    <div class="card"><p style="margin:0;line-height:1.55" data-i18n="aboutText"></p></div>
+    <div class="card small muted" data-i18n="aboutData"></div>
+    <div class="credit" data-i18n="credit"></div>
+  </section>
+</main>
+
+<div class="sheet-bg" id="sheet" hidden>
+  <form class="sheet" id="manualForm" autocomplete="off">
+    <h3 data-i18n="typeManual"></h3>
+    <input id="manualInput" inputmode="numeric" pattern="[0-9]*" maxlength="14" data-i18n-ph="manualPh">
+    <div class="small" id="manualErr" style="color:var(--red)" hidden></div>
+    <div class="row">
+      <button type="button" class="btn secondary" id="sheetCancel" data-i18n="cancel"></button>
+      <button type="submit" class="btn" data-i18n="search"></button>
+    </div>
+  </form>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+/* ============================== TRANSLATIONS ============================== */
+const I18N = {
+  en:{
+    tagline:"Scan. Know. Eat better.",
+    welcomeText:"Scan the barcode or QR code of any food product to see how it scores for your health.",
+    allowCamera:"Allow camera & start",
+    privacy:"No account needed. Your scan history stays only on this device.",
+    aboutLink:"About this app", aboutTitle:"About GoodFood",
+    aboutText:"GoodFood rates food products from 0 to 100 using public data from Open Food Facts. Score = 50% Nutri-Score (nutritional balance) + 25% NOVA (level of processing) + 25% additives. A high-risk additive caps the score at 49. When some data is missing, the score uses only what is available and is marked as partial. You can also compare products side by side with their prices, check package claims against EU limits, and have the result read aloud. If a product is missing from the database, you can score it yourself from the label; your entry is saved only on this phone. This is information, not medical advice.",
+    aboutData:"Product data © Open Food Facts contributors, available under the Open Database License (ODbL). Data is crowdsourced and may be incomplete or inaccurate.",
+    credit:"Created by: Michael Gerontides",
+    scanTitle:"Scan", scanHint:"Point your camera at a barcode or QR code",
+    typeManual:"Type barcode manually", supports:"Supports EAN, UPC and GS1 QR codes",
+    manualPh:"e.g. 5201234567890", search:"Search", cancel:"Cancel",
+    camError:"Camera not available. Allow camera access in your browser settings, or type the barcode.",
+    retry:"Try again",
+    loadingTitle:"Looking up the product…", loadingSub:"Fetching product information and analyzing its ingredients.",
+    step1:"Connecting to database", step2:"Retrieving product data", step3:"Analyzing nutrition", step4:"Checking additives",
+    resultTitle:"Result", healthScore:"Health score",
+    band_excellent:"Excellent", band_good:"Good", band_poor:"Poor", band_bad:"Bad",
+    desc_excellent:"A very good choice for regular consumption.", desc_good:"A reasonable choice.",
+    desc_poor:"Best eaten occasionally.", desc_bad:"Try to limit this product.",
+    noScore:"Not enough data to score this product.",
+    partial:"Partial data: the score uses only the information available.",
+    capped:"Contains a high-risk additive, so the score is capped at 49.",
+    nutriscore:"Nutri-Score", nova:"NOVA", additives:"Additives", ofConcern:"of concern", unknown:"Unknown",
+    keyNutrition:"Key nutrition (per 100 g)", fat:"fat", satfat:"saturates", sugars:"sugars", salt:"salt",
+    kcal:"kcal", fiber:"fibre", protein:"protein", energy:"energy",
+    nova1:"Unprocessed or minimally processed", nova2:"Processed culinary ingredient", nova3:"Processed food", nova4:"Ultra-processed food",
+    btnIngredients:"Ingredients & additives", btnAlternatives:"Healthier alternatives", btnScanAgain:"Scan another product",
+    disclaimer:"Information only, not medical advice. Data: Open Food Facts (may be incomplete).",
+    readAloud:"Read aloud", stopReading:"Stop reading",
+    noSpeech:"Read aloud isn't supported on this browser.",
+    noGreekVoice:"No Greek voice found on this phone. Add one in the phone's text-to-speech settings.",
+    sp_score:"Health score {s} out of 100. {b}.", sp_reasons:"Main reasons:",
+    why:"Why this score", whyNone:"Not enough data to explain the score.",
+    whyBetter:"Would score higher with: {list}.",
+    r_highAdd:"Contains a high-risk additive: {x}", r_nova4:"Ultra-processed food (NOVA 4)",
+    r_sugar:"High in sugar ({v} g per 100 {u})", r_salt:"High in salt ({v} g per 100 {u})",
+    r_sat:"High in saturated fat ({v} g per 100 {u})", r_fat:"High in fat ({v} g per 100 {u})",
+    r_nutriBad:"Poor nutritional balance (Nutri-Score {g})", r_modAdd:"Additives of moderate concern: {n}",
+    p_nova1:"Unprocessed or minimally processed (NOVA 1)", p_nutriGood:"Good nutritional balance (Nutri-Score {g})",
+    p_fibre:"High in fibre", p_protein:"High in protein", p_lowSugar:"Low in sugar", p_lowSalt:"Low in salt",
+    i_highAdd:"no high-risk additives", i_nova4:"less processing", i_sugar:"less sugar", i_salt:"less salt",
+    i_sat:"less saturated fat", i_fat:"less fat", i_nutriBad:"better nutritional balance", i_modAdd:"fewer additives",
+    amounts:"In real life", tspNote:"1 teaspoon ≈ 4 g of sugar.",
+    a_pack:"Whole pack ({q} {u}): {g} g of sugar ≈ {t} teaspoons",
+    a_portion:"One portion ({q} {u})", a_per100:"Per 100 {u} (no portion size given)",
+    a_ofDaily:"share of an adult's daily reference intake:", a_none:"Nutrition data not available.",
+    claims:"Package claims check", claimsNone:"No claims found in the database for this product.",
+    claimPick:"Check a claim you see on the package…",
+    claimOk:"✓ Meets EU limit", claimFail:"✗ Does not meet EU limit", claimNA:"Can't check (data missing)",
+    claimNM:"Can't be checked from nutrition data",
+    claimsNote:"Limits from EU Regulation 1924/2006 on nutrition claims.",
+    addCompare:"Add to compare", inCompare:"✓ In compare (tap to remove)",
+    cmpFull:"You can compare up to 4 products.", cmpAdded:"Added to compare ({n}/4)",
+    cmpTitle:"Compare", cmpEmpty:"No products to compare yet. Scan a product and tap “Add to compare”.",
+    cmpOne:"Add at least one more product to compare.",
+    bestPick:"Best pick", bestPickWhy:"Highest health score ({s}/100).",
+    bestValue:"Best value for health", bestValueWhy:"Most health points for the money ({v} € per kg/L).",
+    sameBoth:"It is also the best value for money.",
+    priceHint:"Type the shelf prices to see the best value for money.",
+    priceLabel:"Price (€)", perKg:"€ per kg/L", rConcern:"Additives of concern",
+    rSugar:"Sugars /100", rSalt:"Salt /100", rSat:"Saturates /100", rFiber:"Fibre /100", rProtein:"Protein /100",
+    clearCompare:"Clear comparison", remove:"Remove",
+    ingTitle:"Ingredients & additives", ingredients:"Ingredients", noIngredients:"Ingredient list not available.",
+    additivesFound:"Additives found", noAdditives:"No additives listed.",
+    noConcern:"No additives of concern", noConcernSub:"None of the listed additives are flagged in our list.",
+    risk_high:"High risk", risk_moderate:"Moderate risk", risk_low:"Not flagged",
+    additiveNote:"Ratings are a simplified summary of EU and international food-safety assessments.",
+    altTitle:"Healthier alternatives", altSub:"Similar products with a better health score.",
+    altLoading:"Searching similar products…", altNone:"No better-scoring alternatives found in this category.",
+    altNoCat:"This product has no category, so alternatives can't be searched.",
+    notFoundTitle:"Product not found", notFoundText:"We couldn't find this product in the Open Food Facts database.",
+    whatCanDo:"What you can do:", scanAgain:"Scan again", enterManual:"Enter barcode manually",
+    addOff:"Add this product on Open Food Facts", barcode:"Barcode",
+    historyTitle:"Scan history", historyEmpty:"No scans yet. Scanned products will appear here.",
+    clearHistory:"Clear history", confirmClear:"Delete all scan history?",
+    today:"Today", yesterday:"Yesterday",
+    errNetwork:"Network error. Check your connection and try again.",
+    errRate:"Too many requests. Please wait a minute and try again.",
+    invalidCode:"Enter a valid barcode (8 to 14 digits).",
+    qrNoProduct:"This QR code doesn't contain a product barcode.",
+    unnamed:"Unnamed product",
+    scoreYourself:"Score it yourself from the package",
+    scoreYourselfSub:"Type the numbers from the nutrition table. It takes about a minute and is saved on this phone.",
+    greekTitle:"Help improve Greek products",
+    greekText:"Own-brand products from Greek supermarkets (Sklavenitis, AB, Lidl, Masoutis and others) are often missing from Open Food Facts. When you add a product there, with photos of the front, the ingredients and the nutrition table, it becomes available to everyone, including GoodFood.",
+    entryTitle:"Your entry", entryIntro:"Copy the values from the nutrition table on the package.",
+    f_name:"Product name", f_brand:"Brand", f_type:"Type", f_solid:"Food (per 100 g)", f_drink:"Drink (per 100 ml)",
+    f_pack:"Pack size ({u})", f_serving:"Portion size ({u}, optional)", f_per:"Nutrition per 100 {u}",
+    f_kcal:"Energy (kcal)", f_fat:"Fat (g)", f_sat:"of which saturates (g)", f_sugar:"Sugars (g)",
+    f_fiber:"Fibre (g)", f_prot:"Protein (g)", f_salt:"Salt (g)", f_reqNote:"* required",
+    f_enums:"E-numbers in the ingredients", f_enumsPh:"e.g. E250, E322", f_noE:"The ingredient list has no E-numbers",
+    f_enumsHelp:"Leave empty and unticked if you haven't checked the ingredient list.",
+    saveScore:"Save & score", deleteEntry:"Delete my entry", confirmDelete:"Delete your entry for this product?",
+    errRequired:"Fill in energy, saturates, sugars and salt.", errValues:"Some values look wrong. Check them against the label.",
+    savedLocal:"Saved on this phone", entryDeleted:"Your entry was deleted.",
+    userNote:"Based on your entry, saved only on this phone. The Nutri-Score is estimated with the official formula. The processing level (NOVA) can't be judged from the label numbers, so the score is partial.",
+    editEntry:"Edit my entry", shareOff:"Add it to Open Food Facts for everyone", copyValues:"Copy my values",
+    copied:"Values copied. Paste or check them when adding the product.", copyFail:"Couldn't copy on this browser.",
+    estimated:"estimated", yourEntryTag:"your entry",
+    offIncomplete:"Missing data? Complete this product on Open Food Facts",
+    noFvl:"Fruit, vegetable and legume content is not counted (assumed 0%), so the estimate may be slightly strict."
+  },
+  el:{
+    tagline:"Σκάναρε. Μάθε. Φάε καλύτερα.",
+    welcomeText:"Σκάναρε το barcode ή τον κωδικό QR οποιουδήποτε τροφίμου για να δεις πόσο καλό είναι για την υγεία σου.",
+    allowCamera:"Άδεια κάμερας & έναρξη",
+    privacy:"Δεν χρειάζεται λογαριασμός. Το ιστορικό σαρώσεων μένει μόνο σε αυτή τη συσκευή.",
+    aboutLink:"Σχετικά με την εφαρμογή", aboutTitle:"Σχετικά με το GoodFood",
+    aboutText:"Το GoodFood βαθμολογεί τα τρόφιμα από 0 έως 100 με δημόσια δεδομένα του Open Food Facts. Βαθμολογία = 50% Nutri-Score (διατροφική ισορροπία) + 25% NOVA (βαθμός επεξεργασίας) + 25% πρόσθετα. Ένα πρόσθετο υψηλού κινδύνου περιορίζει τη βαθμολογία στο 49. Όταν λείπουν στοιχεία, η βαθμολογία βασίζεται μόνο στα διαθέσιμα και σημειώνεται ως μερική. Μπορείς επίσης να συγκρίνεις προϊόντα δίπλα-δίπλα με τις τιμές τους, να ελέγξεις τους ισχυρισμούς της συσκευασίας με βάση τα όρια της ΕΕ και να ακούσεις το αποτέλεσμα φωναχτά. Αν ένα προϊόν λείπει από τη βάση δεδομένων, μπορείς να το βαθμολογήσεις μόνος σου από την ετικέτα· η καταχώρισή σου αποθηκεύεται μόνο σε αυτό το τηλέφωνο. Πρόκειται για ενημέρωση, όχι για ιατρική συμβουλή.",
+    aboutData:"Δεδομένα προϊόντων © συντελεστές του Open Food Facts, διαθέσιμα με την άδεια Open Database License (ODbL). Τα δεδομένα προέρχονται από εθελοντές και μπορεί να είναι ελλιπή ή ανακριβή.",
+    credit:"Δημιουργός: Michael Gerontides",
+    scanTitle:"Σάρωση", scanHint:"Στόχευσε την κάμερα σε barcode ή κωδικό QR",
+    typeManual:"Πληκτρολόγηση κωδικού", supports:"Υποστηρίζει κωδικούς EAN, UPC και GS1 QR",
+    manualPh:"π.χ. 5201234567890", search:"Αναζήτηση", cancel:"Άκυρο",
+    camError:"Η κάμερα δεν είναι διαθέσιμη. Επίτρεψε την πρόσβαση στην κάμερα από τις ρυθμίσεις του browser ή πληκτρολόγησε τον κωδικό.",
+    retry:"Δοκίμασε ξανά",
+    loadingTitle:"Αναζήτηση προϊόντος…", loadingSub:"Λήψη πληροφοριών και ανάλυση συστατικών.",
+    step1:"Σύνδεση με τη βάση δεδομένων", step2:"Λήψη στοιχείων προϊόντος", step3:"Ανάλυση διατροφικής αξίας", step4:"Έλεγχος προσθέτων",
+    resultTitle:"Αποτέλεσμα", healthScore:"Βαθμολογία υγείας",
+    band_excellent:"Εξαιρετικό", band_good:"Καλό", band_poor:"Μέτριο", band_bad:"Κακό",
+    desc_excellent:"Πολύ καλή επιλογή για τακτική κατανάλωση.", desc_good:"Λογική επιλογή.",
+    desc_poor:"Καλύτερα περιστασιακά.", desc_bad:"Προσπάθησε να το περιορίσεις.",
+    noScore:"Δεν υπάρχουν αρκετά στοιχεία για βαθμολόγηση.",
+    partial:"Ελλιπή στοιχεία: η βαθμολογία βασίζεται μόνο στα διαθέσιμα.",
+    capped:"Περιέχει πρόσθετο υψηλού κινδύνου, γι' αυτό η βαθμολογία περιορίζεται στο 49.",
+    nutriscore:"Nutri-Score", nova:"NOVA", additives:"Πρόσθετα", ofConcern:"προς προσοχή", unknown:"Άγνωστο",
+    keyNutrition:"Βασικά διατροφικά (ανά 100 g)", fat:"λιπαρά", satfat:"κορεσμένα", sugars:"σάκχαρα", salt:"αλάτι",
+    kcal:"kcal", fiber:"φυτ. ίνες", protein:"πρωτεΐνη", energy:"ενέργεια",
+    nova1:"Ανεπεξέργαστο ή ελάχιστα επεξεργασμένο", nova2:"Επεξεργασμένο μαγειρικό συστατικό", nova3:"Επεξεργασμένο τρόφιμο", nova4:"Υπερ-επεξεργασμένο τρόφιμο",
+    btnIngredients:"Συστατικά & πρόσθετα", btnAlternatives:"Πιο υγιεινές εναλλακτικές", btnScanAgain:"Σάρωση άλλου προϊόντος",
+    disclaimer:"Μόνο για ενημέρωση, όχι ιατρική συμβουλή. Δεδομένα: Open Food Facts (μπορεί να είναι ελλιπή).",
+    readAloud:"Ανάγνωση φωναχτά", stopReading:"Διακοπή ανάγνωσης",
+    noSpeech:"Η ανάγνωση φωναχτά δεν υποστηρίζεται σε αυτόν τον browser.",
+    noGreekVoice:"Δεν βρέθηκε ελληνική φωνή στο τηλέφωνο. Πρόσθεσέ τη από τις ρυθμίσεις μετατροπής κειμένου σε ομιλία.",
+    sp_score:"Βαθμολογία υγείας {s} στα 100. {b}.", sp_reasons:"Κύριοι λόγοι:",
+    why:"Γιατί αυτή η βαθμολογία", whyNone:"Δεν υπάρχουν αρκετά στοιχεία για να εξηγηθεί η βαθμολογία.",
+    whyBetter:"Θα είχε υψηλότερη βαθμολογία με: {list}.",
+    r_highAdd:"Περιέχει πρόσθετο υψηλού κινδύνου: {x}", r_nova4:"Υπερ-επεξεργασμένο τρόφιμο (NOVA 4)",
+    r_sugar:"Πολλά σάκχαρα ({v} g ανά 100 {u})", r_salt:"Πολύ αλάτι ({v} g ανά 100 {u})",
+    r_sat:"Πολλά κορεσμένα λιπαρά ({v} g ανά 100 {u})", r_fat:"Πολλά λιπαρά ({v} g ανά 100 {u})",
+    r_nutriBad:"Κακή διατροφική ισορροπία (Nutri-Score {g})", r_modAdd:"Πρόσθετα μέτριου κινδύνου: {n}",
+    p_nova1:"Ανεπεξέργαστο ή ελάχιστα επεξεργασμένο (NOVA 1)", p_nutriGood:"Καλή διατροφική ισορροπία (Nutri-Score {g})",
+    p_fibre:"Πλούσιο σε φυτικές ίνες", p_protein:"Πλούσιο σε πρωτεΐνη", p_lowSugar:"Λίγα σάκχαρα", p_lowSalt:"Λίγο αλάτι",
+    i_highAdd:"χωρίς πρόσθετα υψηλού κινδύνου", i_nova4:"λιγότερη επεξεργασία", i_sugar:"λιγότερα σάκχαρα", i_salt:"λιγότερο αλάτι",
+    i_sat:"λιγότερα κορεσμένα λιπαρά", i_fat:"λιγότερα λιπαρά", i_nutriBad:"καλύτερη διατροφική ισορροπία", i_modAdd:"λιγότερα πρόσθετα",
+    amounts:"Στην πράξη", tspNote:"1 κουταλάκι ≈ 4 g ζάχαρη.",
+    a_pack:"Ολόκληρη η συσκευασία ({q} {u}): {g} g σάκχαρα ≈ {t} κουταλάκια",
+    a_portion:"Μία μερίδα ({q} {u})", a_per100:"Ανά 100 {u} (δεν δίνεται μέγεθος μερίδας)",
+    a_ofDaily:"ποσοστό της ημερήσιας ενδεικτικής πρόσληψης ενήλικα:", a_none:"Δεν υπάρχουν διατροφικά στοιχεία.",
+    claims:"Έλεγχος ισχυρισμών συσκευασίας", claimsNone:"Δεν βρέθηκαν ισχυρισμοί στη βάση δεδομένων για αυτό το προϊόν.",
+    claimPick:"Έλεγξε έναν ισχυρισμό που βλέπεις στη συσκευασία…",
+    claimOk:"✓ Πληροί το όριο της ΕΕ", claimFail:"✗ Δεν πληροί το όριο της ΕΕ", claimNA:"Δεν ελέγχεται (λείπουν στοιχεία)",
+    claimNM:"Δεν ελέγχεται από τα διατροφικά στοιχεία",
+    claimsNote:"Όρια από τον Κανονισμό (ΕΚ) 1924/2006 για τους ισχυρισμούς διατροφής.",
+    addCompare:"Προσθήκη στη σύγκριση", inCompare:"✓ Στη σύγκριση (πάτησε για αφαίρεση)",
+    cmpFull:"Μπορείς να συγκρίνεις έως 4 προϊόντα.", cmpAdded:"Προστέθηκε στη σύγκριση ({n}/4)",
+    cmpTitle:"Σύγκριση", cmpEmpty:"Δεν υπάρχουν προϊόντα για σύγκριση. Σάρωσε ένα προϊόν και πάτησε «Προσθήκη στη σύγκριση».",
+    cmpOne:"Πρόσθεσε τουλάχιστον ένα ακόμα προϊόν για σύγκριση.",
+    bestPick:"Καλύτερη επιλογή", bestPickWhy:"Υψηλότερη βαθμολογία υγείας ({s}/100).",
+    bestValue:"Καλύτερη σχέση τιμής και υγείας", bestValueWhy:"Περισσότεροι πόντοι υγείας για τα χρήματα ({v} € ανά kg/L).",
+    sameBoth:"Είναι επίσης η πιο συμφέρουσα επιλογή.",
+    priceHint:"Πληκτρολόγησε τις τιμές του ραφιού για να δεις την πιο συμφέρουσα επιλογή.",
+    priceLabel:"Τιμή (€)", perKg:"€ ανά kg/L", rConcern:"Πρόσθετα προς προσοχή",
+    rSugar:"Σάκχαρα /100", rSalt:"Αλάτι /100", rSat:"Κορεσμένα /100", rFiber:"Φυτ. ίνες /100", rProtein:"Πρωτεΐνη /100",
+    clearCompare:"Καθαρισμός σύγκρισης", remove:"Αφαίρεση",
+    ingTitle:"Συστατικά & πρόσθετα", ingredients:"Συστατικά", noIngredients:"Η λίστα συστατικών δεν είναι διαθέσιμη.",
+    additivesFound:"Πρόσθετα που βρέθηκαν", noAdditives:"Δεν αναφέρονται πρόσθετα.",
+    noConcern:"Κανένα πρόσθετο προς προσοχή", noConcernSub:"Κανένα από τα πρόσθετα δεν επισημαίνεται στη λίστα μας.",
+    risk_high:"Υψηλός κίνδυνος", risk_moderate:"Μέτριος κίνδυνος", risk_low:"Χωρίς επισήμανση",
+    additiveNote:"Οι αξιολογήσεις είναι απλοποιημένη σύνοψη αξιολογήσεων ασφάλειας τροφίμων της ΕΕ και διεθνών φορέων.",
+    altTitle:"Πιο υγιεινές εναλλακτικές", altSub:"Παρόμοια προϊόντα με καλύτερη βαθμολογία υγείας.",
+    altLoading:"Αναζήτηση παρόμοιων προϊόντων…", altNone:"Δεν βρέθηκαν εναλλακτικές με καλύτερη βαθμολογία σε αυτή την κατηγορία.",
+    altNoCat:"Το προϊόν δεν έχει κατηγορία, οπότε δεν μπορούν να αναζητηθούν εναλλακτικές.",
+    notFoundTitle:"Το προϊόν δεν βρέθηκε", notFoundText:"Δεν βρήκαμε αυτό το προϊόν στη βάση δεδομένων του Open Food Facts.",
+    whatCanDo:"Τι μπορείς να κάνεις:", scanAgain:"Σάρωση ξανά", enterManual:"Πληκτρολόγηση κωδικού",
+    addOff:"Πρόσθεσε το προϊόν στο Open Food Facts", barcode:"Κωδικός",
+    historyTitle:"Ιστορικό σαρώσεων", historyEmpty:"Δεν υπάρχουν σαρώσεις ακόμα. Τα προϊόντα που σαρώνεις θα εμφανίζονται εδώ.",
+    clearHistory:"Διαγραφή ιστορικού", confirmClear:"Διαγραφή όλου του ιστορικού;",
+    today:"Σήμερα", yesterday:"Χθες",
+    errNetwork:"Σφάλμα δικτύου. Έλεγξε τη σύνδεσή σου και δοκίμασε ξανά.",
+    errRate:"Πάρα πολλά αιτήματα. Περίμενε ένα λεπτό και δοκίμασε ξανά.",
+    invalidCode:"Πληκτρολόγησε έγκυρο κωδικό (8 έως 14 ψηφία).",
+    qrNoProduct:"Αυτός ο κωδικός QR δεν περιέχει κωδικό προϊόντος.",
+    unnamed:"Προϊόν χωρίς όνομα",
+    scoreYourself:"Βαθμολόγησέ το από τη συσκευασία",
+    scoreYourselfSub:"Πληκτρολόγησε τους αριθμούς από τον πίνακα διατροφικής αξίας. Χρειάζεται περίπου ένα λεπτό και αποθηκεύεται σε αυτό το τηλέφωνο.",
+    greekTitle:"Βοήθησε να βελτιωθούν τα ελληνικά προϊόντα",
+    greekText:"Τα προϊόντα ιδιωτικής ετικέτας των ελληνικών σούπερ μάρκετ (Σκλαβενίτης, ΑΒ, Lidl, Μασούτης και άλλα) συχνά λείπουν από το Open Food Facts. Όταν προσθέτεις ένα προϊόν εκεί, με φωτογραφίες της πρόσοψης, των συστατικών και του πίνακα διατροφικής αξίας, γίνεται διαθέσιμο σε όλους, και στο GoodFood.",
+    entryTitle:"Η καταχώρισή σου", entryIntro:"Αντίγραψε τις τιμές από τον πίνακα διατροφικής αξίας της συσκευασίας.",
+    f_name:"Όνομα προϊόντος", f_brand:"Μάρκα", f_type:"Τύπος", f_solid:"Τρόφιμο (ανά 100 g)", f_drink:"Ρόφημα (ανά 100 ml)",
+    f_pack:"Μέγεθος συσκευασίας ({u})", f_serving:"Μέγεθος μερίδας ({u}, προαιρετικό)", f_per:"Διατροφική αξία ανά 100 {u}",
+    f_kcal:"Ενέργεια (kcal)", f_fat:"Λιπαρά (g)", f_sat:"εκ των οποίων κορεσμένα (g)", f_sugar:"Σάκχαρα (g)",
+    f_fiber:"Φυτικές ίνες (g)", f_prot:"Πρωτεΐνες (g)", f_salt:"Αλάτι (g)", f_reqNote:"* υποχρεωτικό",
+    f_enums:"Κωδικοί E στα συστατικά", f_enumsPh:"π.χ. E250, E322", f_noE:"Η λίστα συστατικών δεν έχει κωδικούς E",
+    f_enumsHelp:"Άφησέ το κενό και χωρίς επιλογή αν δεν έχεις ελέγξει τη λίστα συστατικών.",
+    saveScore:"Αποθήκευση & βαθμολόγηση", deleteEntry:"Διαγραφή της καταχώρισής μου", confirmDelete:"Διαγραφή της καταχώρισής σου για αυτό το προϊόν;",
+    errRequired:"Συμπλήρωσε ενέργεια, κορεσμένα, σάκχαρα και αλάτι.", errValues:"Κάποιες τιμές φαίνονται λάθος. Έλεγξέ τες με την ετικέτα.",
+    savedLocal:"Αποθηκεύτηκε σε αυτό το τηλέφωνο", entryDeleted:"Η καταχώρισή σου διαγράφηκε.",
+    userNote:"Με βάση την καταχώρισή σου, αποθηκευμένη μόνο σε αυτό το τηλέφωνο. Το Nutri-Score υπολογίζεται κατά προσέγγιση με τον επίσημο τύπο. Ο βαθμός επεξεργασίας (NOVA) δεν μπορεί να κριθεί από τους αριθμούς της ετικέτας, οπότε η βαθμολογία είναι μερική.",
+    editEntry:"Επεξεργασία της καταχώρισής μου", shareOff:"Πρόσθεσέ το στο Open Food Facts για όλους", copyValues:"Αντιγραφή των τιμών μου",
+    copied:"Οι τιμές αντιγράφηκαν. Επικόλλησέ τες ή έλεγξέ τες όταν προσθέτεις το προϊόν.", copyFail:"Η αντιγραφή δεν είναι δυνατή σε αυτόν τον browser.",
+    estimated:"κατά προσέγγιση", yourEntryTag:"δική σου καταχώριση",
+    offIncomplete:"Λείπουν στοιχεία; Συμπλήρωσε το προϊόν στο Open Food Facts",
+    noFvl:"Η περιεκτικότητα σε φρούτα, λαχανικά και όσπρια δεν υπολογίζεται (θεωρείται 0%), οπότε η εκτίμηση μπορεί να είναι λίγο αυστηρή."
+  }
+};
+
+/* ============================== ADDITIVES ============================== */
+const R = {
+  nitr:["Can form nitrosamines; processed meats containing them are linked to higher colorectal cancer risk.","Μπορεί να σχηματίσουν νιτροζαμίνες· τα επεξεργασμένα κρέατα που τα περιέχουν συνδέονται με αυξημένο κίνδυνο καρκίνου του παχέος εντέρου."],
+  tio2:["No longer authorised as a food additive in the EU since 2022; its safety could not be confirmed.","Δεν επιτρέπεται πλέον ως πρόσθετο τροφίμων στην ΕΕ από το 2022· η ασφάλειά του δεν μπορούσε να επιβεβαιωθεί."],
+  azo:["EU requires a warning: may have an adverse effect on activity and attention in children.","Η ΕΕ απαιτεί προειδοποίηση: μπορεί να επηρεάσει αρνητικά τη δραστηριότητα και την προσοχή των παιδιών."],
+  bha:["Classified as possibly carcinogenic to humans (IARC group 2B).","Ταξινομείται ως πιθανώς καρκινογόνο για τον άνθρωπο (IARC ομάδα 2B)."],
+  bht:["Synthetic antioxidant; some studies raise concerns and intake limits apply.","Συνθετικό αντιοξειδωτικό· ορισμένες μελέτες εγείρουν ανησυχίες και ισχύουν όρια πρόσληψης."],
+  asp:["Classified as possibly carcinogenic (IARC group 2B, 2023); considered safe within intake limits by JECFA.","Ταξινομήθηκε ως πιθανώς καρκινογόνο (IARC ομάδα 2B, 2023)· θεωρείται ασφαλής εντός ορίων πρόσληψης από την JECFA."],
+  swt:["Artificial sweetener; long-term health effects are still debated.","Τεχνητό γλυκαντικό· οι μακροπρόθεσμες επιπτώσεις στην υγεία συζητούνται ακόμα."],
+  emu:["Emulsifier/thickener; animal studies suggest possible effects on gut health.","Γαλακτωματοποιητής/πυκνωτικό· μελέτες σε ζώα δείχνουν πιθανές επιδράσεις στην υγεία του εντέρου."],
+  pho:["High phosphate intake is a concern for heart and kidney health; EFSA set an intake limit in 2019.","Η υψηλή πρόσληψη φωσφορικών αποτελεί ανησυχία για την καρδιά και τα νεφρά· η EFSA όρισε όριο πρόσληψης το 2019."],
+  sul:["Can trigger reactions in people with asthma or sulfite sensitivity.","Μπορεί να προκαλέσουν αντιδράσεις σε άτομα με άσθμα ή ευαισθησία στα θειώδη."],
+  ben:["Can form small amounts of benzene when combined with vitamin C.","Μπορεί να σχηματίσει μικρές ποσότητες βενζολίου σε συνδυασμό με βιταμίνη C."],
+  car:["Caramel colour that may contain 4-MEI, possibly carcinogenic (IARC group 2B).","Χρώμα καραμέλας που μπορεί να περιέχει 4-MEI, πιθανώς καρκινογόνο (IARC ομάδα 2B)."]
+};
+const ADD = {};
+[
+ ["e249","Potassium nitrite","Νιτρώδες κάλιο","high","nitr"],["e250","Sodium nitrite","Νιτρώδες νάτριο","high","nitr"],
+ ["e251","Sodium nitrate","Νιτρικό νάτριο","high","nitr"],["e252","Potassium nitrate","Νιτρικό κάλιο","high","nitr"],
+ ["e171","Titanium dioxide","Διοξείδιο του τιτανίου","high","tio2"],["e320","BHA","BHA (βουτυλυδροξυανισόλη)","high","bha"],
+ ["e102","Tartrazine","Ταρτραζίνη","moderate","azo"],["e104","Quinoline yellow","Κίτρινο κινολίνης","moderate","azo"],
+ ["e110","Sunset yellow FCF","Κίτρινο ηλιοβασιλέματος FCF","moderate","azo"],["e122","Azorubine","Αζορουμπίνη","moderate","azo"],
+ ["e124","Ponceau 4R","Ponceau 4R","moderate","azo"],["e129","Allura red AC","Κόκκινο Allura AC","moderate","azo"],
+ ["e321","BHT","BHT (βουτυλυδροξυτολουόλιο)","moderate","bht"],["e951","Aspartame","Ασπαρτάμη","moderate","asp"],
+ ["e950","Acesulfame K","Ακεσουλφάμη Κ","moderate","swt"],["e955","Sucralose","Σουκραλόζη","moderate","swt"],
+ ["e954","Saccharin","Σακχαρίνη","moderate","swt"],["e407","Carrageenan","Καραγενάνη","moderate","emu"],
+ ["e433","Polysorbate 80","Πολυσορβικό 80","moderate","emu"],["e466","Carboxymethyl cellulose","Καρβοξυμεθυλοκυτταρίνη","moderate","emu"],
+ ["e338","Phosphoric acid","Φωσφορικό οξύ","moderate","pho"],["e339","Sodium phosphates","Φωσφορικά νάτρια","moderate","pho"],
+ ["e340","Potassium phosphates","Φωσφορικά κάλια","moderate","pho"],["e341","Calcium phosphates","Φωσφορικά ασβέστια","moderate","pho"],
+ ["e450","Diphosphates","Διφωσφορικά","moderate","pho"],["e451","Triphosphates","Τριφωσφορικά","moderate","pho"],
+ ["e452","Polyphosphates","Πολυφωσφορικά","moderate","pho"],
+ ["e220","Sulphur dioxide","Διοξείδιο του θείου","moderate","sul"],["e221","Sodium sulphite","Θειώδες νάτριο","moderate","sul"],
+ ["e222","Sodium bisulphite","Όξινο θειώδες νάτριο","moderate","sul"],["e223","Sodium metabisulphite","Μεταθειώδες νάτριο","moderate","sul"],
+ ["e224","Potassium metabisulphite","Μεταθειώδες κάλιο","moderate","sul"],["e226","Calcium sulphite","Θειώδες ασβέστιο","moderate","sul"],
+ ["e227","Calcium bisulphite","Όξινο θειώδες ασβέστιο","moderate","sul"],["e228","Potassium bisulphite","Όξινο θειώδες κάλιο","moderate","sul"],
+ ["e211","Sodium benzoate","Βενζοϊκό νάτριο","moderate","ben"],
+ ["e150c","Ammonia caramel","Καραμέλα αμμωνίας","moderate","car"],["e150d","Sulphite ammonia caramel","Καραμέλα θειώδους αμμωνίας","moderate","car"],
+ ["e100","Curcumin","Κουρκουμίνη","low"],["e160a","Carotenes","Καροτένια","low"],["e200","Sorbic acid","Σορβικό οξύ","low"],
+ ["e202","Potassium sorbate","Σορβικό κάλιο","low"],["e260","Acetic acid","Οξικό οξύ","low"],["e270","Lactic acid","Γαλακτικό οξύ","low"],
+ ["e290","Carbon dioxide","Διοξείδιο του άνθρακα","low"],["e300","Ascorbic acid","Ασκορβικό οξύ","low"],
+ ["e306","Tocopherols","Τοκοφερόλες","low"],["e322","Lecithins","Λεκιθίνες","low"],["e330","Citric acid","Κιτρικό οξύ","low"],
+ ["e331","Sodium citrates","Κιτρικά νάτρια","low"],["e412","Guar gum","Κόμμι γκουάρ","low"],["e415","Xanthan gum","Κόμμι ξανθάνης","low"],
+ ["e440","Pectins","Πηκτίνες","low"],["e471","Mono- and diglycerides of fatty acids","Μονο- και διγλυκερίδια λιπαρών οξέων","low"],
+ ["e500","Sodium carbonates","Ανθρακικά νάτρια","low"],["e503","Ammonium carbonates","Ανθρακικά αμμώνια","low"],
+ ["e509","Calcium chloride","Χλωριούχο ασβέστιο","low"],["e1422","Acetylated distarch adipate","Ακετυλιωμένο αδιπικό διάμυλο","low"]
+].forEach(([c,en,el,risk,rk])=>{ ADD[c]={en,el,risk,reason:rk?R[rk]:null}; });
+
+/* ============================== EU NUTRITION CLAIMS (Reg. 1924/2006 Annex) ==============================
+   [id, OFF label tag pattern, test(v, isLiquid) -> true/false/null(missing data) or "nm"(not measurable), {en:[name,rule], el:[name,rule]}] */
+const CLAIMS = [
+ ["low_energy",/:low-(energy|calories?)$/,(v,l)=>v.kcal==null?null:v.kcal<=(l?20:40),
+   {en:["Low energy","Max 40 kcal per 100 g (20 kcal per 100 ml)"],el:["Χαμηλή ενέργεια","Έως 40 kcal ανά 100 g (20 kcal ανά 100 ml)"]}],
+ ["low_fat",/:low-fats?$/,(v,l)=>v.fat==null?null:v.fat<=(l?1.5:3),
+   {en:["Low fat","Max 3 g fat per 100 g (1.5 g per 100 ml)"],el:["Χαμηλά λιπαρά","Έως 3 g λιπαρά ανά 100 g (1,5 g ανά 100 ml)"]}],
+ ["fat_free",/:(fat-free|no-fat|0-fat)$/,v=>v.fat==null?null:v.fat<=0.5,
+   {en:["Fat free","Max 0.5 g fat per 100 g or 100 ml"],el:["Χωρίς λιπαρά","Έως 0,5 g λιπαρά ανά 100 g ή 100 ml"]}],
+ ["low_satfat",/:low-saturated-fats?$/,(v,l)=>v.sat==null?null:(v.sat<=(l?0.75:1.5)&&(v.kcal?v.sat*9<=0.1*v.kcal:true)),
+   {en:["Low saturated fat","Max 1.5 g per 100 g (0.75 g per 100 ml) and max 10% of energy"],el:["Χαμηλά κορεσμένα λιπαρά","Έως 1,5 g ανά 100 g (0,75 g ανά 100 ml) και έως 10% της ενέργειας"]}],
+ ["low_sugar",/:low-sugars?$/,(v,l)=>v.sugar==null?null:v.sugar<=(l?2.5:5),
+   {en:["Low sugar","Max 5 g sugars per 100 g (2.5 g per 100 ml)"],el:["Χαμηλά σάκχαρα","Έως 5 g σάκχαρα ανά 100 g (2,5 g ανά 100 ml)"]}],
+ ["sugar_free",/:(sugars?-free|no-sugars?|0-sugars?)$/,v=>v.sugar==null?null:v.sugar<=0.5,
+   {en:["Sugar free","Max 0.5 g sugars per 100 g or 100 ml"],el:["Χωρίς σάκχαρα","Έως 0,5 g σάκχαρα ανά 100 g ή 100 ml"]}],
+ ["no_added_sugar",/:no-added-sugars?$/,()=>"nm",
+   {en:["No added sugar","No added sugars or sweetening foods allowed"],el:["Χωρίς προσθήκη ζάχαρης","Δεν επιτρέπεται προσθήκη σακχάρων ή γλυκαντικών τροφίμων"]}],
+ ["low_salt",/:low-(salt|sodium)$/,v=>v.salt==null?null:v.salt<=0.3,
+   {en:["Low salt","Max 0.3 g salt (0.12 g sodium) per 100 g or 100 ml"],el:["Χαμηλό αλάτι","Έως 0,3 g αλάτι (0,12 g νάτριο) ανά 100 g ή 100 ml"]}],
+ ["very_low_salt",/:very-low-(salt|sodium)$/,v=>v.salt==null?null:v.salt<=0.1,
+   {en:["Very low salt","Max 0.1 g salt (0.04 g sodium) per 100 g or 100 ml"],el:["Πολύ χαμηλό αλάτι","Έως 0,1 g αλάτι (0,04 g νάτριο) ανά 100 g ή 100 ml"]}],
+ ["salt_free",/:(salt-free|sodium-free)$/,v=>v.salt==null?null:v.salt<=0.0125,
+   {en:["Salt free","Max 0.0125 g salt (0.005 g sodium) per 100 g"],el:["Χωρίς αλάτι","Έως 0,0125 g αλάτι (0,005 g νάτριο) ανά 100 g"]}],
+ ["src_fibre",/:source-of-fib(re|er)s?$/,v=>v.fiber==null?null:(v.fiber>=3||(v.kcal>0&&v.fiber/v.kcal*100>=1.5)),
+   {en:["Source of fibre","At least 3 g per 100 g or 1.5 g per 100 kcal"],el:["Πηγή φυτικών ινών","Τουλάχιστον 3 g ανά 100 g ή 1,5 g ανά 100 kcal"]}],
+ ["high_fibre",/:(high|rich-in)-fib(re|er)s?$/,v=>v.fiber==null?null:(v.fiber>=6||(v.kcal>0&&v.fiber/v.kcal*100>=3)),
+   {en:["High fibre","At least 6 g per 100 g or 3 g per 100 kcal"],el:["Υψηλή περιεκτικότητα σε φυτικές ίνες","Τουλάχιστον 6 g ανά 100 g ή 3 g ανά 100 kcal"]}],
+ ["src_protein",/:source-of-proteins?$/,v=>(v.prot==null||!v.kcal)?null:v.prot*4/v.kcal>=0.12,
+   {en:["Source of protein","At least 12% of energy from protein"],el:["Πηγή πρωτεΐνης","Τουλάχιστον 12% της ενέργειας από πρωτεΐνη"]}],
+ ["high_protein",/:(high|rich-in)-proteins?$/,v=>(v.prot==null||!v.kcal)?null:v.prot*4/v.kcal>=0.2,
+   {en:["High protein","At least 20% of energy from protein"],el:["Υψηλή περιεκτικότητα σε πρωτεΐνη","Τουλάχιστον 20% της ενέργειας από πρωτεΐνη"]}]
+];
+
+/* ============================== STATE & HELPERS ============================== */
+const $ = s => document.querySelector(s);
+const OFF = "https://world.openfoodfacts.org";
+const FIELDS = "code,product_name,product_name_el,product_name_en,brands,quantity,product_quantity,serving_quantity,image_front_small_url,nutriscore_grade,nova_group,additives_tags,ingredients_text,ingredients_text_el,ingredients_text_en,nutriments,categories_tags,labels_tags";
+const ALT_FIELDS = "code,product_name,product_name_el,product_name_en,brands,quantity,image_front_small_url,nutriscore_grade,nova_group,additives_tags,ingredients_text";
+const CACHE = "gf_p2_";
+let lang = localStorage.getItem("gf_lang") || ((navigator.language || "").toLowerCase().startsWith("el") ? "el" : "en");
+let stack = [];
+let current = null;
+const altCache = {};
+const extraClaims = {};
+let nfCodeVal = null, entryCode = null, entryDraft = null;
+const t = k => (I18N[lang][k] ?? I18N.en[k] ?? k);
+const tf = (k, o) => t(k).replace(/\{(\w+)\}/g, (m, x) => (o[x] ?? m));
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const num = v => (v == null || v === "" || isNaN(v)) ? null : Number(v);
+const n1 = (v, d = 1) => Number(v).toLocaleString(lang === "el" ? "el-GR" : "en-GB", {maximumFractionDigits:d});
+function toast(msg){ const el=$("#toast"); el.textContent=msg; el.classList.add("show"); clearTimeout(toast._t); toast._t=setTimeout(()=>el.classList.remove("show"),2600); }
+const hasSpeech = "speechSynthesis" in window;
+function stopSpeech(){ if (hasSpeech) speechSynthesis.cancel(); }
+
+/* ============================== LANGUAGE ============================== */
+function applyLang(){
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-i18n]").forEach(el => el.textContent = t(el.dataset.i18n));
+  document.querySelectorAll("[data-i18n-ph]").forEach(el => el.placeholder = t(el.dataset.i18nPh));
+  $("#langEN").classList.toggle("on", lang === "en");
+  $("#langGR").classList.toggle("on", lang === "el");
+  const s = stack[stack.length - 1];
+  if (s) { renderScreen(s); setTopbar(s); }
+}
+function setLang(l){ stopSpeech(); lang = l; localStorage.setItem("gf_lang", l); applyLang(); }
+$("#langEN").onclick = () => setLang("en");
+$("#langGR").onclick = () => setLang("el");
+
+/* ============================== NAVIGATION ============================== */
+const TITLES = {scanner:"scanTitle", loading:"", result:"resultTitle", additives:"ingTitle", alternatives:"altTitle", compare:"cmpTitle", entry:"entryTitle", notfound:"", history:"historyTitle", about:"aboutTitle"};
+function setTopbar(name){
+  const key = TITLES[name];
+  $("#title").textContent = key ? t(key) : "";
+  $("#title").hidden = !key;
+  $("#brand").hidden = !!key;
+  $("#backBtn").hidden = stack.length <= 1 || name === "loading";
+  $("#historyBtn").hidden = name === "history" || name === "welcome";
+  $("#compareBtn").hidden = name === "compare" || name === "welcome";
+  updateBadge();
+}
+function show(name){
+  stopSpeech();
+  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("active", s.id === "s-" + name));
+  if (name === "scanner") startCamera(); else stopCamera();
+  renderScreen(name); setTopbar(name); window.scrollTo(0, 0);
+}
+function go(name, replace = false){
+  if (replace && stack.length) { stack[stack.length - 1] = name; history.replaceState({s:name}, ""); }
+  else { stack.push(name); history.pushState({s:name}, ""); }
+  show(name);
+}
+window.addEventListener("popstate", () => {
+  if (stack.length > 1) { stack.pop(); if (stack[stack.length-1] === "loading") stack.pop(); show(stack[stack.length - 1]); }
+  else { history.pushState({s:stack[0]}, ""); }
+});
+$("#backBtn").onclick = () => history.back();
+$("#historyBtn").onclick = () => go("history");
+$("#compareBtn").onclick = () => go("compare");
+function goScanner(){
+  const i = stack.lastIndexOf("scanner");
+  if (i >= 0) { const steps = stack.length - 1 - i; if (steps > 0) { history.go(-steps); return; } show("scanner"); }
+  else go("scanner");
+}
+function renderScreen(name){
+  if (name === "result") renderResult();
+  else if (name === "additives") renderAdditives();
+  else if (name === "alternatives") renderAlternatives();
+  else if (name === "compare") renderCompare();
+  else if (name === "history") renderHistory();
+  else if (name === "entry") renderEntry();
+}
+
+/* ============================== CAMERA & SCANNING ============================== */
+const FORMATS = ["ean_13","ean_8","upc_a","upc_e","qr_code"];
+let stream = null, detector = null, scanning = false, torchOn = false;
+async function getDetector(){
+  if ("BarcodeDetector" in window) {
+    try {
+      const sup = await window.BarcodeDetector.getSupportedFormats();
+      if (sup.includes("ean_13")) return new window.BarcodeDetector({formats: FORMATS.filter(f => sup.includes(f))});
+    } catch (e) {}
+  }
+  const mod = await import("https://fastly.jsdelivr.net/npm/barcode-detector@2/dist/es/pure.min.js");
+  return new mod.BarcodeDetector({formats: FORMATS});
+}
+async function startCamera(){
+  if (stream) return;
+  $("#camError").hidden = true;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({audio:false, video:{facingMode:{ideal:"environment"}, width:{ideal:1280}, height:{ideal:720}}});
+    const v = $("#video"); v.srcObject = stream; await v.play();
+    const track = stream.getVideoTracks()[0];
+    const caps = track.getCapabilities ? track.getCapabilities() : {};
+    $("#torchBtn").hidden = !caps.torch;
+    detector = detector || await getDetector();
+    scanning = true; scanLoop();
+  } catch (e) {
+    console.warn(e); stopCamera(); $("#camError").hidden = false;
+  }
+}
+function stopCamera(){
+  scanning = false; torchOn = false;
+  if (stream) { stream.getTracks().forEach(tr => tr.stop()); stream = null; }
+  const v = $("#video"); if (v) v.srcObject = null;
+}
+async function scanLoop(){
+  if (!scanning) return;
+  const v = $("#video");
+  if (v.readyState >= 2) {
+    try {
+      const res = await detector.detect(v);
+      if (res && res.length && scanning) {
+        const code = parseCode(res[0].rawValue);
+        if (code) { if (navigator.vibrate) navigator.vibrate(60); scanning = false; lookup(code); return; }
+        toast(t("qrNoProduct")); await sleep(1500);
+      }
+    } catch (e) {}
+  }
+  setTimeout(scanLoop, 150);
+}
+function parseCode(raw){
+  const s = String(raw || "").trim();
+  const m = s.match(/^\d{8,14}$/) ? [null, s] : (s.match(/\/01\/(\d{14})/) || s.match(/^(?:\]\w\d)?\(?01\)?(\d{14})/));
+  if (!m) return null;
+  let c = m[1];
+  if (c.length === 14 && c.startsWith("0")) c = c.slice(1);
+  return c;
+}
+$("#torchBtn").onclick = async () => {
+  if (!stream) return;
+  torchOn = !torchOn;
+  try { await stream.getVideoTracks()[0].applyConstraints({advanced:[{torch:torchOn}]}); } catch (e) { torchOn = false; }
+};
+$("#retryCam").onclick = () => startCamera();
+
+function openSheet(){ $("#sheet").hidden = false; $("#manualErr").hidden = true; $("#manualInput").value = ""; setTimeout(() => $("#manualInput").focus(), 50); }
+$("#manualBtn").onclick = openSheet;
+$("#nfManual").onclick = openSheet;
+$("#sheetCancel").onclick = () => $("#sheet").hidden = true;
+$("#manualForm").onsubmit = e => {
+  e.preventDefault();
+  const v = $("#manualInput").value.replace(/\D/g, "");
+  if (v.length < 8 || v.length > 14) { $("#manualErr").textContent = t("invalidCode"); $("#manualErr").hidden = false; return; }
+  $("#sheet").hidden = true; lookup(v);
+};
+
+/* ============================== DATA ============================== */
+async function lookup(code){
+  stopCamera();
+  if (stack[stack.length-1] === "notfound") stack.pop();
+  go("loading");
+  setStep(1);
+  try {
+    let p = cacheGet(code), netErr = null;
+    if (!p) {
+      try {
+        const res = await fetch(`${OFF}/api/v3/product/${encodeURIComponent(code)}?fields=${FIELDS}`);
+        if (res.status === 429) throw new Error("rate");
+        setStep(2);
+        let data = null; try { data = await res.json(); } catch (e) {}
+        p = data && data.product && Object.keys(data.product).length ? data.product : null;
+        if (p) { p.code = p.code || code; cachePut(code, p); }
+      } catch (e) { netErr = e; }
+    } else { setStep(2); }
+    if (!p) p = userGet(code);          /* reuse the shopper's own saved entry */
+    if (!p && netErr) throw netErr;
+    if (!p) { nfCodeVal = code; $("#nfCode").textContent = `${t("barcode")}: ${code}`;
+      $("#nfAdd").href = `${OFF}/cgi/product.pl?type=search_or_add&code=${encodeURIComponent(code)}`;
+      go("notfound", true); return; }
+    await sleep(250); setStep(3); await sleep(250); setStep(4); await sleep(200);
+    current = p;
+    addHistory(p);
+    go("result", true);
+  } catch (e) {
+    toast(e.message === "rate" ? t("errRate") : t("errNetwork"));
+    history.back();
+  }
+}
+function setStep(n){
+  document.querySelectorAll("#steps li").forEach((li, i) => li.classList.toggle("done", i < n));
+  $("#progBar").style.width = (n * 25) + "%";
+}
+function cacheGet(code){
+  try { const o = JSON.parse(localStorage.getItem(CACHE + code)); if (o && Date.now() - o.ts < 7*864e5) return o.p; } catch (e) {}
+  return null;
+}
+function cachePut(code, p){
+  try { localStorage.setItem(CACHE + code, JSON.stringify({ts:Date.now(), p})); }
+  catch (e) { Object.keys(localStorage).filter(k => k.startsWith("gf_p")).forEach(k => localStorage.removeItem(k)); }
+}
+
+/* ============================== ANALYSIS ============================== */
+const NS_PTS = {a:100, b:80, c:55, d:30, e:10};
+const NOVA_PTS = {1:100, 2:85, 3:55, 4:20};
+const NS_COL = {a:"var(--ns-a)", b:"var(--ns-b)", c:"var(--ns-c)", d:"var(--ns-d)", e:"var(--ns-e)"};
+const NOVA_COL = {1:"#00AA00", 2:"#E6B800", 3:"#FF6600", 4:"#E63E11"};
+/* low / high thresholds per 100 g (solids) and per 100 ml (drinks), front-of-pack traffic-light style */
+const LV = {fat:[[3,17.5],[1.5,8.75]], sat:[[1.5,5],[0.75,2.5]], sugar:[[5,22.5],[2.5,11.25]], salt:[[0.3,1.5],[0.3,0.75]]};
+function lv(k, v, liq){ if (v == null) return null; const [lo, hi] = LV[k][liq ? 1 : 0]; return v <= lo ? "low" : v > hi ? "high" : "med"; }
+
+function pickName(p){
+  const n = lang === "el" ? (p.product_name_el || p.product_name || p.product_name_en) : (p.product_name_en || p.product_name || p.product_name_el);
+  return n || t("unnamed");
+}
+function isLiquid(p){
+  if (p._liquid != null) return !!p._liquid;
+  return /\d\s*(ml|cl|l)\b/i.test(p.quantity || "") || (p.categories_tags || []).includes("en:beverages");
+}
+function parseAdditives(tags){
+  return (tags || []).map(tag => {
+    const m = String(tag).toLowerCase().match(/e(\d{3,4})([a-z]*)/);
+    if (!m) return null;
+    const full = "e" + m[1] + m[2], base = "e" + m[1];
+    const info = ADD[full] || ADD[base] || null;
+    return {code: "E" + m[1] + m[2], name: info ? info[lang] : "", risk: info ? info.risk : "low",
+            reason: info && info.reason ? info.reason[lang === "el" ? 1 : 0] : ""};
+  }).filter(Boolean);
+}
+function analyze(p){
+  const ns = (p.nutriscore_grade || "").toLowerCase();
+  const nutri = NS_PTS[ns] !== undefined ? ns : null;
+  const nova = NOVA_PTS[p.nova_group] !== undefined ? Number(p.nova_group) : null;
+  const hasIngr = !!(p.ingredients_text || p.ingredients_text_el || p.ingredients_text_en);
+  const adds = parseAdditives(p.additives_tags);
+  const high = adds.filter(a => a.risk === "high").length;
+  const mod = adds.filter(a => a.risk === "moderate").length;
+  const addKnown = Array.isArray(p.additives_tags) && (hasIngr || adds.length > 0 || !!p._addChecked);
+  let score = null, partial = false, capped = false;
+  if (nutri || nova) {
+    const parts = [];
+    if (nutri) parts.push([NS_PTS[nutri], 0.5]);
+    if (nova) parts.push([NOVA_PTS[nova], 0.25]);
+    if (addKnown) parts.push([Math.max(0, 100 - 40*high - 20*mod), 0.25]);
+    const w = parts.reduce((s, x) => s + x[1], 0);
+    score = Math.round(parts.reduce((s, x) => s + x[0]*x[1], 0) / w);
+    partial = parts.length < 3;
+    if (high > 0 && score > 49) { score = 49; capped = true; }
+  }
+  const n = p.nutriments || {};
+  return {code:p.code, name:pickName(p), brand:p.brands || "", qty:p.quantity || "", img:p.image_front_small_url || "",
+          nutri, nova, adds, concern: high + mod, addKnown, score, partial, capped, n,
+          v:{kcal:num(n["energy-kcal_100g"]), fat:num(n.fat_100g), sat:num(n["saturated-fat_100g"]), sugar:num(n.sugars_100g),
+             salt:num(n.salt_100g), fiber:num(n.fiber_100g), prot:num(n.proteins_100g)},
+          pq:num(p.product_quantity), sq:num(p.serving_quantity), liquid:isLiquid(p),
+          labels:p.labels_tags || [], categories:p.categories_tags || []};
+}
+function band(score){
+  if (score >= 75) return {k:"excellent", c:"#038141"};
+  if (score >= 50) return {k:"good", c:"#5AA02C"};
+  if (score >= 25) return {k:"poor", c:"#EE8100"};
+  return {k:"bad", c:"#E63E11"};
+}
+function pillHtml(score){
+  if (score == null) return `<div class="pill" style="background:var(--bg);color:var(--muted)">?</div>`;
+  const b = band(score);
+  return `<div class="pill" style="background:${b.c}1F;color:${b.c}">${score}<small>/100</small></div>`;
+}
+function thumb(img){ return img ? `<img src="${esc(img)}" alt="" loading="lazy">` : `<div class="thumb">🥫</div>`; }
+
+/* Why this score: top negatives and positives */
+function reasons(a){
+  const v = a.v, u = a.liquid ? "ml" : "g", neg = [], pos = [];
+  const hi = a.adds.filter(x => x.risk === "high");
+  if (hi.length) neg.push({text: tf("r_highAdd", {x: hi.map(x => x.code + (x.name ? " (" + x.name + ")" : "")).join(", ")}), imp:"i_highAdd"});
+  if (a.nova === 4) neg.push({text: t("r_nova4"), imp:"i_nova4"});
+  [["sugar","r_sugar","i_sugar"],["salt","r_salt","i_salt"],["sat","r_sat","i_sat"]].forEach(([k, r, i]) => {
+    if (lv(k, v[k], a.liquid) === "high") neg.push({text: tf(r, {v: n1(v[k]), u}), imp: i});
+  });
+  if (a.nutri === "d" || a.nutri === "e") neg.push({text: tf("r_nutriBad", {g: a.nutri.toUpperCase()}), imp:"i_nutriBad"});
+  const md = a.adds.filter(x => x.risk === "moderate").length;
+  if (md) neg.push({text: tf("r_modAdd", {n: md}), imp:"i_modAdd"});
+  if (lv("fat", v.fat, a.liquid) === "high" && lv("sat", v.sat, a.liquid) !== "high") neg.push({text: tf("r_fat", {v: n1(v.fat), u}), imp:"i_fat"});
+
+  if (a.nova === 1) pos.push(t("p_nova1"));
+  if (a.nutri === "a" || a.nutri === "b") pos.push(tf("p_nutriGood", {g: a.nutri.toUpperCase()}));
+  if (a.addKnown && a.concern === 0) pos.push(t("noConcern"));
+  if (v.fiber != null && v.fiber >= 6) pos.push(t("p_fibre"));
+  if (v.prot != null && v.kcal && v.prot*4/v.kcal >= 0.2) pos.push(t("p_protein"));
+  if (lv("sugar", v.sugar, a.liquid) === "low") pos.push(t("p_lowSugar"));
+  if (lv("salt", v.salt, a.liquid) === "low") pos.push(t("p_lowSalt"));
+  const top = neg.slice(0, 3);
+  return {neg: top, pos: pos.slice(0, 2), imps: [...new Set(top.map(x => t(x.imp)))]};
+}
+function packLine(a){
+  const s = a.v.sugar;
+  if (!a.pq || s == null || a.pq > 5000) return "";
+  const g = s * a.pq / 100;
+  return tf("a_pack", {q: n1(a.pq, 0), u: a.liquid ? "ml" : "g", g: n1(g, 0), t: n1(g / 4, 0)});
+}
+function amountsHtml(a){
+  const v = a.v, u = a.liquid ? "ml" : "g";
+  const pl = packLine(a);
+  const base = a.sq || 100;
+  const label = a.sq ? tf("a_portion", {q: n1(a.sq), u}) : tf("a_per100", {u});
+  const items = [["energy", v.kcal, 2000], ["sugars", v.sugar, 90], ["satfat", v.sat, 20], ["salt", v.salt, 6]];
+  const bars = items.filter(i => i[1] != null).map(([k, val, ri]) => {
+    const pct = Math.round(val * base / 100 / ri * 100);
+    const col = pct >= 25 ? "var(--red)" : pct >= 10 ? "var(--amber)" : "#2E9E5B";
+    return `<div><div class="lab"><span>${esc(t(k))}</span><b>${pct}%</b></div><div class="bar"><i style="width:${Math.min(pct,100)}%;background:${col}"></i></div></div>`;
+  }).join("");
+  if (!pl && !bars) return `<div class="muted small">${esc(t("a_none"))}</div>`;
+  return (pl ? `<div>🥄 ${esc(pl)}</div><div class="small muted" style="margin-top:4px">${esc(t("tspNote"))}</div>` : "") +
+    (bars ? `<div class="small" style="margin-top:${pl ? 12 : 0}px"><b>${esc(label)}</b>: ${esc(t("a_ofDaily"))}</div><div class="ri">${bars}</div>` : "");
+}
+function claimStatus(c, a){
+  const r = c[2](a.v, a.liquid);
+  if (r === "nm") return ["claimNM", "var(--muted)"];
+  if (r === null) return ["claimNA", "var(--muted)"];
+  return r ? ["claimOk", "var(--green)"] : ["claimFail", "var(--red)"];
+}
+function claimsHtml(a){
+  const detected = CLAIMS.filter(c => a.labels.some(l => c[1].test(String(l).toLowerCase())));
+  const extra = CLAIMS.filter(c => (extraClaims[a.code] || new Set()).has(c[0]) && !detected.includes(c));
+  const shown = [...detected, ...extra];
+  const rows = shown.map(c => {
+    const [k, col] = claimStatus(c, a);
+    const tx = c[3][lang] || c[3].en;
+    return `<div class="claim"><div><b>${esc(tx[0])}</b><div class="small muted">${esc(tx[1])}</div></div><div class="st" style="color:${col}">${esc(t(k))}</div></div>`;
+  }).join("");
+  const opts = CLAIMS.filter(c => !shown.includes(c)).map(c => `<option value="${c[0]}">${esc((c[3][lang] || c[3].en)[0])}</option>`).join("");
+  return `<div class="card"><h3 class="sec">${esc(t("claims"))}</h3>
+    ${rows || `<div class="small muted">${esc(t("claimsNone"))}</div>`}
+    ${opts ? `<select class="pick" id="claimPick"><option value="">${esc(t("claimPick"))}</option>${opts}</select>` : ""}
+    <div class="small muted" style="margin-top:8px">${esc(t("claimsNote"))}</div></div>`;
+}
+
+/* ============================== READ ALOUD ============================== */
+if (hasSpeech) { speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices(); }
+function speechify(s){
+  const el = lang === "el";
+  return s.replace(/≈/g, el ? "περίπου" : "about")
+          .replace(/(\d)\s?g\b/g, "$1 " + (el ? "γραμμάρια" : "grams"))
+          .replace(/(\d)\s?ml\b/g, "$1 " + (el ? "χιλιοστόλιτρα" : "millilitres"));
+}
+function setSpeakBtn(on){
+  const b = $("#speakBtn"); if (!b) return;
+  b.classList.toggle("on", on);
+  b.querySelector("span").textContent = t(on ? "stopReading" : "readAloud");
+}
+function speakResult(){
+  if (!hasSpeech) { toast(t("noSpeech")); return; }
+  if (speechSynthesis.speaking) { stopSpeech(); setSpeakBtn(false); return; }
+  const a = analyze(current);
+  const parts = [a.name + "."];
+  if (a.score != null) { const b = band(a.score); parts.push(tf("sp_score", {s: a.score, b: t("band_" + b.k)}), t("desc_" + b.k)); }
+  else parts.push(t("noScore"));
+  const r = reasons(a);
+  const items = [...r.neg.map(x => x.text), ...r.pos];
+  if (items.length) parts.push(t("sp_reasons") + " " + items.join(". ") + ".");
+  const pl = packLine(a); if (pl) parts.push(pl + ".");
+  const u = new SpeechSynthesisUtterance(speechify(parts.join(" ")));
+  u.lang = lang === "el" ? "el-GR" : "en-GB";
+  const vs = speechSynthesis.getVoices();
+  const norm = x => x.lang.toLowerCase().replace("_", "-");
+  const voice = lang === "el" ? vs.find(x => norm(x).startsWith("el"))
+                              : (vs.find(x => norm(x) === "en-gb") || vs.find(x => norm(x).startsWith("en")));
+  if (voice) u.voice = voice; else if (lang === "el" && vs.length) toast(t("noGreekVoice"));
+  u.rate = 0.95;
+  u.onend = u.onerror = () => setSpeakBtn(false);
+  stopSpeech(); speechSynthesis.speak(u); setSpeakBtn(true);
+}
+
+/* ============================== RENDER: RESULT ============================== */
+function renderResult(){
+  if (!current) return;
+  const a = analyze(current);
+  const n = a.n, v = a.v;
+  const fmt = x => x == null ? "–" : n1(x);
+  const lvc = (k, x) => { const r = lv(k, x, a.liquid); return r ? "lv-" + r : ""; };
+  let scoreHtml;
+  if (a.score == null) {
+    scoreHtml = `<div class="note">${esc(t("noScore"))}</div>`;
+  } else {
+    const b = band(a.score);
+    scoreHtml = `<div class="card"><div class="small muted" style="margin-bottom:8px;font-weight:700">${esc(t("healthScore"))}</div>
+      <div class="scorecard"><div class="ring" style="--v:${a.score};--c:${b.c}"><div><b>${a.score}</b><span>/100</span></div></div>
+      <div><p class="band" style="color:${b.c}">${esc(t("band_" + b.k))}</p><div class="muted">${esc(t("desc_" + b.k))}</div></div></div></div>`;
+    if (a.capped) scoreHtml += `<div class="note">${esc(t("capped"))}</div>`;
+    else if (a.partial) scoreHtml += `<div class="note">${esc(t("partial"))}</div>`;
+  }
+  const isUser = !!current._user;
+  const nsBadge = (a.nutri ? `<div class="val" style="background:${NS_COL[a.nutri]}">${a.nutri.toUpperCase()}</div>` : `<div class="val" style="background:#C9CFCB">?</div>`)
+    + (isUser && a.nutri ? `<div class="sub">${esc(t("estimated"))}</div>` : "");
+  const offAdd = `${OFF}/cgi/product.pl?type=search_or_add&code=${encodeURIComponent(a.code)}`;
+  const userHtml = isUser ? `<div class="userbox"><div>${esc(t("userNote"))}</div><div class="muted">${esc(t("noFvl"))}</div>
+      <button class="btn secondary small-btn" id="editEntry">${esc(t("editEntry"))}</button>
+      <button class="btn secondary small-btn" id="copyVals">${esc(t("copyValues"))}</button>
+      <a class="btn small-btn" href="${esc(offAdd)}" target="_blank" rel="noopener" style="text-decoration:none">${esc(t("shareOff"))} ↗</a></div>` : "";
+  const incompleteHtml = !isUser && (a.score == null || a.partial || a.v.kcal == null)
+    ? `<a class="link small" style="text-align:center" href="${OFF}/product/${encodeURIComponent(a.code)}" target="_blank" rel="noopener">${esc(t("offIncomplete"))} ↗</a>` : "";
+  const novaBadge = a.nova ? `<div class="val" style="background:${NOVA_COL[a.nova]}">${a.nova}</div><div class="sub">${esc(t("nova" + a.nova))}</div>` : `<div class="val" style="background:#C9CFCB">?</div><div class="sub">${esc(t("unknown"))}</div>`;
+  const addCol = !a.addKnown ? "#C9CFCB" : a.concern === 0 ? "#038141" : a.adds.some(x => x.risk === "high") ? "#E63E11" : "#EE8100";
+  const addBadge = `<div class="val" style="background:${addCol}">${a.addKnown ? a.concern : "?"}</div><div class="sub">${esc(a.addKnown ? t("ofConcern") : t("unknown"))}</div>`;
+
+  const r = reasons(a);
+  const whyItems = r.neg.map(x => `<li><span class="ic" style="background:var(--red)">−</span><span>${esc(x.text)}</span></li>`).join("") +
+                   r.pos.map(x => `<li><span class="ic" style="background:var(--green)">+</span><span>${esc(x)}</span></li>`).join("");
+  const whyHtml = `<div class="card"><h3 class="sec">${esc(t("why"))}</h3>
+    ${whyItems ? `<ul class="why">${whyItems}</ul>` : `<div class="small muted">${esc(t("whyNone"))}</div>`}
+    ${r.imps.length ? `<div class="small muted" style="margin-top:10px">${esc(tf("whyBetter", {list: r.imps.join(", ")}))}</div>` : ""}</div>`;
+
+  const inCmp = cmpList().some(x => x.code === a.code);
+  const unitHdr = a.liquid ? t("keyNutrition").replace("100 g", "100 ml") : t("keyNutrition");
+
+  $("#s-result").innerHTML = `
+    <div class="prod">${a.img ? `<img src="${esc(a.img)}" alt="">` : `<div class="thumb">🥫</div>`}
+      <div><h2>${esc(a.name)}</h2><div class="muted small">${esc([a.brand, a.qty].filter(Boolean).join(" · "))}</div>
+      <span class="chip">${esc(a.code)}</span>${isUser ? `<span class="ucode">✎ ${esc(t("yourEntryTag"))}</span>` : ""}</div></div>
+    ${userHtml}
+    ${scoreHtml}
+    <button class="btn secondary" id="speakBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg>
+      <span>${esc(t("readAloud"))}</span></button>
+    <div class="badges">
+      <div class="badge"><div class="lbl">${esc(t("nutriscore"))}</div>${nsBadge}</div>
+      <div class="badge"><div class="lbl">${esc(t("nova"))}</div>${novaBadge}</div>
+      <div class="badge"><div class="lbl">${esc(t("additives"))}</div>${addBadge}</div>
+    </div>
+    ${whyHtml}
+    <h3 class="sec">${esc(unitHdr)}</h3>
+    <div class="nutr">
+      <div><b>${fmt(v.kcal)}</b><span>${esc(t("kcal"))}</span></div>
+      <div class="${lvc("fat", v.fat)}"><b>${fmt(v.fat)} g</b><span>${esc(t("fat"))}</span></div>
+      <div class="${lvc("sat", v.sat)}"><b>${fmt(v.sat)} g</b><span>${esc(t("satfat"))}</span></div>
+      <div class="${lvc("sugar", v.sugar)}"><b>${fmt(v.sugar)} g</b><span>${esc(t("sugars"))}</span></div>
+      <div class="${lvc("salt", v.salt)}"><b>${fmt(v.salt)} g</b><span>${esc(t("salt"))}</span></div>
+      <div><b>${fmt(v.fiber)} g</b><span>${esc(t("fiber"))}</span></div>
+      <div><b>${fmt(v.prot)} g</b><span>${esc(t("protein"))}</span></div>
+    </div>
+    <div class="card"><h3 class="sec">${esc(t("amounts"))}</h3>${amountsHtml(a)}</div>
+    ${claimsHtml(a)}
+    <button class="btn secondary${inCmp ? " on" : ""}" id="toCmp">${esc(t(inCmp ? "inCompare" : "addCompare"))}</button>
+    <button class="btn secondary" id="toAdd">${esc(t("btnIngredients"))}</button>
+    ${isUser ? "" : `<button class="btn secondary" id="toAlt">${esc(t("btnAlternatives"))}</button>`}
+    <button class="btn" id="toScan">${esc(t("btnScanAgain"))}</button>
+    ${incompleteHtml}
+    <div class="disclaimer">${esc(t("disclaimer"))}</div>
+    <div class="credit">${esc(t("credit"))}</div>`;
+  $("#speakBtn").onclick = speakResult;
+  $("#toCmp").onclick = () => toggleCompare(current);
+  $("#toAdd").onclick = () => go("additives");
+  if ($("#toAlt")) $("#toAlt").onclick = () => go("alternatives");
+  $("#toScan").onclick = goScanner;
+  if (isUser) {
+    $("#editEntry").onclick = () => openEntry(a.code);
+    $("#copyVals").onclick = () => copyValues(current);
+  }
+  const pick = $("#claimPick");
+  if (pick) pick.onchange = () => {
+    if (!pick.value) return;
+    (extraClaims[a.code] = extraClaims[a.code] || new Set()).add(pick.value);
+    const y = window.scrollY; renderResult(); window.scrollTo(0, y);
+  };
+}
+
+/* ============================== COMPARE ============================== */
+function cmpList(){ try { return JSON.parse(localStorage.getItem("gf_cmp")) || []; } catch (e) { return []; } }
+function cmpSave(l){ localStorage.setItem("gf_cmp", JSON.stringify(l)); updateBadge(); }
+function updateBadge(){ const n = cmpList().length; const b = $("#cmpBadge"); b.textContent = n; b.hidden = !n; }
+function toggleCompare(p){
+  const l = cmpList(); const i = l.findIndex(x => x.code === p.code);
+  if (i >= 0) l.splice(i, 1);
+  else { if (l.length >= 4) { toast(t("cmpFull")); return; } l.push({code: p.code, p, price: null}); toast(tf("cmpAdded", {n: l.length})); }
+  cmpSave(l);
+  const y = window.scrollY; renderResult(); window.scrollTo(0, y);
+}
+function renderCompare(){
+  const el = $("#s-compare");
+  const l = cmpList();
+  if (!l.length) {
+    el.innerHTML = `<div class="card muted center">${esc(t("cmpEmpty"))}</div><button class="btn" id="cmpScan">${esc(t("btnScanAgain"))}</button>`;
+    $("#cmpScan").onclick = goScanner; return;
+  }
+  const rows = l.map(x => { const a = analyze(x.p); const ppk = x.price && a.pq ? x.price / (a.pq / 1000) : null; return {x, a, ppk}; });
+  let summary = "";
+  if (rows.length < 2) summary = `<div class="note">${esc(t("cmpOne"))}</div>`;
+  else {
+    const scored = rows.filter(r => r.a.score != null);
+    if (scored.length) {
+      const best = scored.reduce((m, r) => r.a.score > m.a.score ? r : m);
+      const priced = scored.filter(r => r.ppk);
+      let val = "";
+      if (priced.length >= 2) {
+        const bv = priced.reduce((m, r) => (r.a.score / r.ppk) > (m.a.score / m.ppk) ? r : m);
+        val = bv === best ? `<div class="small" style="margin-top:6px">${esc(t("sameBoth"))}</div>`
+          : `<div style="margin-top:10px"><div class="small muted" style="font-weight:700">${esc(t("bestValue"))}</div><b>${esc(bv.a.name)}</b><div class="small muted">${esc(tf("bestValueWhy", {v: n1(bv.ppk, 2)}))}</div></div>`;
+      } else val = `<div class="small muted" style="margin-top:8px">${esc(t("priceHint"))}</div>`;
+      summary = `<div class="card bestcard"><div class="small muted" style="font-weight:700">${esc(t("bestPick"))}</div><b>${esc(best.a.name)}</b>
+        <div class="small muted">${esc(tf("bestPickWhy", {s: best.a.score}))}</div>${val}</div>`;
+    }
+  }
+  const NSI = {a:1, b:2, c:3, d:4, e:5};
+  const metrics = [
+    [t("healthScore"), r => r.a.score, "high", (x) => pillHtml(x)],
+    [t("nutriscore"), r => r.a.nutri ? NSI[r.a.nutri] : null, "low", (x, r) => `<span class="mini" style="background:${NS_COL[r.a.nutri]}">${r.a.nutri.toUpperCase()}</span>`],
+    [t("nova"), r => r.a.nova, "low", (x, r) => `<span class="mini" style="background:${NOVA_COL[x]}">${x}</span>`],
+    [t("rConcern"), r => r.a.addKnown ? r.a.concern : null, "low", x => x],
+    [t("rSugar"), r => r.a.v.sugar, "low", x => n1(x) + " g"],
+    [t("rSalt"), r => r.a.v.salt, "low", x => n1(x, 2) + " g"],
+    [t("rSat"), r => r.a.v.sat, "low", x => n1(x) + " g"],
+    [t("rFiber"), r => r.a.v.fiber, "high", x => n1(x) + " g"],
+    [t("rProtein"), r => r.a.v.prot, "high", x => n1(x) + " g"],
+    [t("perKg"), r => r.ppk, "low", x => n1(x, 2) + " €"]
+  ];
+  const head = `<tr><th></th>${rows.map((r, i) => `<th>${thumb(r.a.img)}<div class="pname">${esc(r.a.name)}</div><button class="rm" data-rm="${i}">${esc(t("remove"))}</button></th>`).join("")}</tr>`;
+  const body = metrics.map(([label, get, dir, fmt]) => {
+    const vals = rows.map(get);
+    const known = vals.filter(x => x != null);
+    let bestV = null;
+    if (rows.length > 1 && known.length > 1 && new Set(known).size > 1) bestV = dir === "high" ? Math.max(...known) : Math.min(...known);
+    return `<tr><td>${esc(label)}</td>${rows.map((r, i) => { const x = vals[i];
+      return `<td class="${x != null && x === bestV ? "best" : ""}">${x == null ? "–" : fmt(x, r)}</td>`; }).join("")}</tr>`;
+  }).join("");
+  const priceRow = `<tr><td>${esc(t("priceLabel"))}</td>${rows.map((r, i) => `<td><input type="text" inputmode="decimal" data-price="${i}" value="${r.x.price != null ? esc(String(r.x.price).replace(".", lang === "el" ? "," : ".")) : ""}" placeholder="0${lang === "el" ? "," : "."}00"></td>`).join("")}</tr>`;
+  el.innerHTML = `${summary}<div class="cmpwrap"><table class="cmp">${head}${priceRow}${body}</table></div>
+    <button class="btn" id="cmpScan">${esc(t("btnScanAgain"))}</button>
+    <button class="btn secondary" id="cmpClear">${esc(t("clearCompare"))}</button>
+    <div class="credit">${esc(t("credit"))}</div>`;
+  el.querySelectorAll("[data-rm]").forEach(b => b.onclick = () => { const L = cmpList(); L.splice(+b.dataset.rm, 1); cmpSave(L); renderCompare(); });
+  el.querySelectorAll("[data-price]").forEach(inp => inp.onchange = () => {
+    const L = cmpList(); const val = parseFloat(inp.value.replace(",", "."));
+    L[+inp.dataset.price].price = isNaN(val) || val <= 0 ? null : val; cmpSave(L); renderCompare();
+  });
+  $("#cmpScan").onclick = goScanner;
+  $("#cmpClear").onclick = () => { cmpSave([]); renderCompare(); };
+}
+
+/* ============================== RENDER: ADDITIVES ============================== */
+function renderAdditives(){
+  if (!current) return;
+  const a = analyze(current);
+  const ingr = lang === "el" ? (current.ingredients_text_el || current.ingredients_text || current.ingredients_text_en)
+                             : (current.ingredients_text_en || current.ingredients_text || current.ingredients_text_el);
+  const riskCol = {high:"#E63E11", moderate:"#EE8100", low:"#9AA39E"};
+  const order = ["high","moderate","low"];
+  const sorted = [...a.adds].sort((x, y) => order.indexOf(x.risk) - order.indexOf(y.risk));
+  const top = a.addKnown && a.concern === 0
+    ? `<div class="okbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"/><path d="M7 12l3.5 3.5L17 9"/></svg>
+       <div><b>${esc(t("noConcern"))}</b><div class="small muted">${esc(t("noConcernSub"))}</div></div></div>` : "";
+  const list = sorted.length ? `<div class="list">${sorted.map(x => `
+      <div class="item"><div class="add-code">${esc(x.code)}</div>
+        <div class="grow"><div>${esc(x.name || "")}</div>${x.reason ? `<div class="reason">${esc(x.reason)}</div>` : ""}</div>
+        <div class="risk"><span class="dot" style="background:${riskCol[x.risk]}"></span>${esc(t("risk_" + x.risk))}</div></div>`).join("")}</div>`
+    : `<div class="muted">${esc(t("noAdditives"))}</div>`;
+  $("#s-additives").innerHTML = `
+    <div class="small muted">${esc(a.name)}</div>
+    ${top}
+    <h3 class="sec">${esc(t("additivesFound"))} (${a.adds.length})</h3>
+    ${list}
+    <div class="note">${esc(t("additiveNote"))}</div>
+    <h3 class="sec">${esc(t("ingredients"))}</h3>
+    <div class="card ingr">${ingr ? esc(ingr) : `<span class="muted">${esc(t("noIngredients"))}</span>`}</div>`;
+}
+
+/* ============================== RENDER: ALTERNATIVES ============================== */
+async function fetchAlternatives(a){
+  const cat = a.categories[a.categories.length - 1];
+  if (!cat) return null;
+  const base = `${OFF}/api/v2/search?categories_tags=${encodeURIComponent(cat)}&fields=${ALT_FIELDS}&page_size=30&sort_by=popularity_key`;
+  const found = new Map();
+  const collect = async url => {
+    const res = await fetch(url);
+    if (res.status === 429) throw new Error("rate");
+    const d = await res.json();
+    (d.products || []).forEach(p => { if (p.code && p.code !== a.code && !found.has(p.code)) found.set(p.code, p); });
+  };
+  await collect(base + "&countries_tags=en:greece");
+  const better = () => [...found.values()].map(p => ({p, s: analyze(p).score}))
+    .filter(x => x.s != null && x.s > (a.score ?? 49));
+  if (better().length < 3) await collect(base);
+  return better().sort((x, y) => y.s - x.s).slice(0, 5).map(x => x.p);
+}
+async function renderAlternatives(){
+  if (!current) return;
+  const a = analyze(current);
+  const el = $("#s-alternatives");
+  const head = `<div class="muted">${esc(t("altSub"))}</div>`;
+  if (!altCache[a.code]) {
+    el.innerHTML = head + `<div class="card muted center">${esc(t("altLoading"))}</div>`;
+    try { altCache[a.code] = {list: await fetchAlternatives(a)}; }
+    catch (e) { el.innerHTML = head + `<div class="note">${esc(e.message === "rate" ? t("errRate") : t("errNetwork"))}</div>`; return; }
+    if (stack[stack.length - 1] !== "alternatives") return;
+  }
+  const list = altCache[a.code].list;
+  if (list === null) { el.innerHTML = head + `<div class="note">${esc(t("altNoCat"))}</div>`; return; }
+  if (!list.length) { el.innerHTML = head + `<div class="note">${esc(t("altNone"))}</div>`; return; }
+  el.innerHTML = head + `<div class="list">${list.map(p => { const x = analyze(p); return `
+    <button class="item" data-code="${esc(x.code)}">${thumb(x.img)}
+      <div class="grow"><div class="name">${esc(x.name)}</div><div class="small muted">${esc([x.brand, x.qty].filter(Boolean).join(" · "))}</div></div>
+      ${pillHtml(x.score)}</button>`; }).join("")}</div>`;
+  el.querySelectorAll("[data-code]").forEach(b => b.onclick = () => lookup(b.dataset.code));
+}
+
+/* ============================== HISTORY ============================== */
+function getHistory(){ try { return JSON.parse(localStorage.getItem("gf_hist")) || []; } catch (e) { return []; } }
+function addHistory(p){
+  const a = analyze(p);
+  const h = getHistory().filter(x => x.code !== a.code);
+  h.unshift({code:a.code, name:a.name, brand:a.brand, img:a.img, score:a.score, ts:Date.now(), u:!!p._user});
+  localStorage.setItem("gf_hist", JSON.stringify(h.slice(0, 50)));
+}
+function when(ts){
+  const d = new Date(ts), now = new Date();
+  const time = d.toLocaleTimeString(lang === "el" ? "el-GR" : "en-GB", {hour:"2-digit", minute:"2-digit"});
+  const day = x => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const diff = Math.round((day(now) - day(d)) / 864e5);
+  if (diff === 0) return `${t("today")}, ${time}`;
+  if (diff === 1) return `${t("yesterday")}, ${time}`;
+  return d.toLocaleDateString(lang === "el" ? "el-GR" : "en-GB", {day:"numeric", month:"short", year:"numeric"});
+}
+function renderHistory(){
+  const h = getHistory();
+  const el = $("#s-history");
+  if (!h.length) { el.innerHTML = `<div class="card muted center">${esc(t("historyEmpty"))}</div>`; return; }
+  el.innerHTML = `<div class="list">${h.map(x => `
+    <button class="item" data-code="${esc(x.code)}">${thumb(x.img)}
+      <div class="grow"><div class="name">${esc(x.name)}</div><div class="small muted">${esc(when(x.ts))}${x.u ? `<span class="ucode">✎ ${esc(t("yourEntryTag"))}</span>` : ""}</div></div>
+      ${pillHtml(x.score)}</button>`).join("")}</div>
+    <button class="btn secondary" id="clearHist">${esc(t("clearHistory"))}</button>`;
+  el.querySelectorAll("[data-code]").forEach(b => b.onclick = () => lookup(b.dataset.code));
+  $("#clearHist").onclick = () => { if (confirm(t("confirmClear"))) { localStorage.removeItem("gf_hist"); renderHistory(); } };
+}
+
+
+/* ============================== NUTRI-SCORE (2023 algorithm, estimate) ==============================
+   Used only for products the shopper enters from the label. Fruit/vegetable/legume share is unknown, so 0 is assumed. */
+function pts(v, th){ let p = 0; for (const x of th) { if (v > x) p++; else break; } return p; }
+function nutriScoreCalc(v, liquid, sweet){
+  const kj = (v.kcal || 0) * 4.184, sug = v.sugar || 0, sat = v.sat || 0, salt = v.salt || 0, fib = v.fiber || 0, pro = v.prot || 0;
+  const satP = pts(sat, [1,2,3,4,5,6,7,8,9,10]);
+  const saltP = pts(salt, Array.from({length:20}, (_, i) => +(0.2*(i+1)).toFixed(1)));
+  const fibP = pts(fib, [3.0,4.1,5.2,6.3,7.4]);
+  if (liquid) {
+    const N = pts(kj, [30,90,150,210,240,270,300,330,360,390]) + pts(sug, [0.5,2,3.5,5,6,7,8,9,10,11]) + satP + saltP + (sweet ? 4 : 0);
+    const P = pts(pro, [1.2,1.5,1.8,2.1,2.4,2.7,3.0]) + fibP;
+    const s = N - P;
+    return s <= 2 ? "b" : s <= 6 ? "c" : s <= 9 ? "d" : "e";
+  }
+  const N = pts(kj, [335,670,1005,1340,1675,2010,2345,2680,3015,3350])
+          + pts(sug, [3.4,6.8,10,14,17,20,24,27,31,34,37,41,44,48,51]) + satP + saltP;
+  const proP = pts(pro, [2.4,4.8,7.2,9.6,12,14,17]);
+  const s = N - (fibP + (N >= 11 ? 0 : proP));
+  return s <= 0 ? "a" : s <= 2 ? "b" : s <= 10 ? "c" : s <= 18 ? "d" : "e";
+}
+
+/* ============================== LOCAL ENTRIES (saved on this phone) ============================== */
+function userAll(){ try { return JSON.parse(localStorage.getItem("gf_user")) || {}; } catch (e) { return {}; } }
+function userGet(code){ const u = userAll()[code]; return u ? JSON.parse(JSON.stringify(u)) : null; }
+function userPut(p){ const u = userAll(); u[p.code] = p; localStorage.setItem("gf_user", JSON.stringify(u)); }
+function userDel(code){ const u = userAll(); delete u[code]; localStorage.setItem("gf_user", JSON.stringify(u)); }
+function parseENums(s){
+  const out = new Set();
+  String(s || "").replace(/[eEεΕ]\s?-?\s?(\d{3,4})\s?([a-dA-D]?)(?![0-9])/g, (m, d, l) => { out.add("en:e" + d + l.toLowerCase()); return m; });
+  return [...out];
+}
+const pnum = s => { const x = String(s ?? "").trim().replace(",", "."); if (x === "") return null; const n = Number(x); return isNaN(n) ? NaN : n; };
+const fstr = v => v == null ? "" : String(v).replace(".", lang === "el" ? "," : ".");
+
+function readEntryForm(){
+  const f = $("#entryForm"); if (!f) return null;
+  const g = id => f.querySelector("#" + id).value;
+  return {name:g("e_name"), brand:g("e_brand"), liquid: f.dataset.liquid === "1", pack:g("e_pack"), serving:g("e_serving"),
+          kcal:g("e_kcal"), fat:g("e_fat"), sat:g("e_sat"), sugar:g("e_sugar"), fiber:g("e_fiber"), prot:g("e_prot"), salt:g("e_salt"),
+          enums:g("e_enums"), noE: f.querySelector("#e_noE").checked};
+}
+function draftFromProduct(p){
+  const n = p.nutriments || {};
+  return {name:p.product_name || "", brand:p.brands || "", liquid:!!p._liquid, pack:fstr(p.product_quantity), serving:fstr(p.serving_quantity),
+          kcal:fstr(n["energy-kcal_100g"]), fat:fstr(n.fat_100g), sat:fstr(n["saturated-fat_100g"]), sugar:fstr(n.sugars_100g),
+          fiber:fstr(n.fiber_100g), prot:fstr(n.proteins_100g), salt:fstr(n.salt_100g),
+          enums:(p.additives_tags || []).map(x => x.replace("en:", "").toUpperCase()).join(", "), noE:!!p._addChecked && !(p.additives_tags || []).length};
+}
+function openEntry(code){ entryCode = code; entryDraft = null; $("#s-entry").innerHTML = ""; go("entry"); }
+function renderEntry(){
+  const el = $("#s-entry");
+  const d = readEntryForm() || entryDraft || (userGet(entryCode) ? draftFromProduct(userGet(entryCode)) : {liquid:false});
+  entryDraft = d;
+  const u = d.liquid ? "ml" : "g";
+  const fld = (id, key, req) => `<div class="field"><label for="${id}">${esc(t(key).replace("{u}", u))}${req ? ' <span class="req">*</span>' : ""}</label>
+     <input id="${id}" type="text" inputmode="decimal" autocomplete="off"></div>`;
+  const exists = !!userGet(entryCode);
+  el.innerHTML = `<form class="form" id="entryForm" novalidate>
+    <div class="muted small">${esc(t("barcode"))}: ${esc(entryCode || "")}</div>
+    <div class="muted">${esc(t("entryIntro"))}</div>
+    <div class="field"><label for="e_name">${esc(t("f_name"))}</label><input id="e_name" type="text" autocomplete="off"></div>
+    <div class="field"><label for="e_brand">${esc(t("f_brand"))}</label><input id="e_brand" type="text" autocomplete="off"></div>
+    <div class="field"><label>${esc(t("f_type"))}</label><div class="seg"><button type="button" data-liq="0">${esc(t("f_solid"))}</button><button type="button" data-liq="1">${esc(t("f_drink"))}</button></div></div>
+    <div class="grid2">${fld("e_pack", "f_pack", false)}${fld("e_serving", "f_serving", false)}</div>
+    <h3 class="sec">${esc(tf("f_per", {u}))}</h3>
+    ${fld("e_kcal", "f_kcal", true)}
+    <div class="grid2">${fld("e_fat", "f_fat", false)}${fld("e_sat", "f_sat", true)}</div>
+    <div class="grid2">${fld("e_sugar", "f_sugar", true)}${fld("e_salt", "f_salt", true)}</div>
+    <div class="grid2">${fld("e_fiber", "f_fiber", false)}${fld("e_prot", "f_prot", false)}</div>
+    <div class="small muted">${esc(t("f_reqNote"))}</div>
+    <div class="field"><label for="e_enums">${esc(t("f_enums"))}</label><input id="e_enums" type="text" autocomplete="off" autocapitalize="characters" placeholder="${esc(t("f_enumsPh"))}"></div>
+    <label class="chk"><input type="checkbox" id="e_noE"><span>${esc(t("f_noE"))}</span></label>
+    <div class="small muted">${esc(t("f_enumsHelp"))}</div>
+    <div class="small" id="entryErr" style="color:var(--red)" hidden></div>
+    <button type="submit" class="btn">${esc(t("saveScore"))}</button>
+    ${exists ? `<button type="button" class="btn secondary" id="entryDel">${esc(t("deleteEntry"))}</button>` : ""}
+    <div class="credit">${esc(t("credit"))}</div></form>`;
+  const f = $("#entryForm");
+  f.dataset.liquid = d.liquid ? "1" : "0";
+  const set = (id, v) => { f.querySelector("#" + id).value = v ?? ""; };
+  ["name","brand","pack","serving","kcal","fat","sat","sugar","fiber","prot","salt","enums"].forEach(k => set("e_" + k, d[k]));
+  f.querySelector("#e_noE").checked = !!d.noE;
+  f.querySelectorAll("[data-liq]").forEach(b => {
+    b.classList.toggle("on", b.dataset.liq === f.dataset.liquid);
+    b.onclick = () => { const cur = readEntryForm(); cur.liquid = b.dataset.liq === "1"; entryDraft = cur; $("#entryForm").remove(); renderEntry(); };
+  });
+  f.onsubmit = e => { e.preventDefault(); saveEntry(); };
+  if ($("#entryDel")) $("#entryDel").onclick = () => {
+    if (!confirm(t("confirmDelete"))) return;
+    userDel(entryCode);
+    localStorage.setItem("gf_hist", JSON.stringify(getHistory().filter(x => x.code !== entryCode)));
+    toast(t("entryDeleted")); entryDraft = null; goScanner();
+  };
+}
+function saveEntry(){
+  const d = readEntryForm(); entryDraft = d;
+  const err = m => { const x = $("#entryErr"); x.textContent = t(m); x.hidden = false; x.scrollIntoView({block:"center"}); };
+  const v = {kcal:pnum(d.kcal), fat:pnum(d.fat), sat:pnum(d.sat), sugar:pnum(d.sugar), fiber:pnum(d.fiber), prot:pnum(d.prot), salt:pnum(d.salt)};
+  const pack = pnum(d.pack), serving = pnum(d.serving);
+  if ([v.kcal, v.sat, v.sugar, v.salt].some(x => x == null)) return err("errRequired");
+  const all = [...Object.values(v), pack, serving].filter(x => x != null);
+  if (all.some(x => isNaN(x) || x < 0) || v.kcal > 900 || v.sugar > 100 || v.salt > 100 || v.sat > 100 || (v.fat != null && v.sat > v.fat + 0.05)
+      || (v.fat || 0) + v.sugar + (v.fiber || 0) + (v.prot || 0) + v.salt > 101) return err("errValues");
+  const tags = parseENums(d.enums);
+  const sweet = tags.some(x => { const n = parseInt(x.slice(4)); return n >= 950 && n <= 969; });
+  const nutriments = {"energy-kcal_100g":v.kcal, "saturated-fat_100g":v.sat, sugars_100g:v.sugar, salt_100g:v.salt};
+  if (v.fat != null) nutriments.fat_100g = v.fat;
+  if (v.fiber != null) nutriments.fiber_100g = v.fiber;
+  if (v.prot != null) nutriments.proteins_100g = v.prot;
+  const u = d.liquid ? "ml" : "g";
+  const p = {code: entryCode, _user: true, _liquid: d.liquid, _ts: Date.now(), _addChecked: tags.length > 0 || d.noE,
+    product_name: d.name.trim(), brands: d.brand.trim(), quantity: pack ? `${pack} ${u}` : "", product_quantity: pack, serving_quantity: serving,
+    nutriscore_grade: nutriScoreCalc(v, d.liquid, sweet), nova_group: null, additives_tags: tags, ingredients_text: "",
+    nutriments, categories_tags: [], labels_tags: []};
+  userPut(p);
+  current = p; addHistory(p); toast(t("savedLocal")); entryDraft = null;
+  const prev = stack[stack.length - 2];
+  if (prev === "result") { history.back(); return; }
+  if (prev === "notfound") stack.splice(stack.length - 2, 1);
+  go("result", true);
+}
+async function copyValues(p){
+  const a = analyze(p), v = a.v, u = a.liquid ? "ml" : "g", f = x => x == null ? "–" : n1(x, 2);
+  const lines = [`${a.name}${a.brand ? " (" + a.brand + ")" : ""}`, `${t("barcode")}: ${a.code}`,
+    `${tf("f_per", {u})}:`, `${t("f_kcal")}: ${f(v.kcal)}`, `${t("f_fat")}: ${f(v.fat)}`, `${t("f_sat")}: ${f(v.sat)}`,
+    `${t("f_sugar")}: ${f(v.sugar)}`, `${t("f_fiber")}: ${f(v.fiber)}`, `${t("f_prot")}: ${f(v.prot)}`, `${t("f_salt")}: ${f(v.salt)}`];
+  if (a.adds.length) lines.push(`${t("f_enums")}: ${a.adds.map(x => x.code).join(", ")}`);
+  try { await navigator.clipboard.writeText(lines.join("\n")); toast(t("copied")); } catch (e) { toast(t("copyFail")); }
+}
+
+/* ============================== START ============================== */
+$("#startBtn").onclick = () => { localStorage.setItem("gf_seen", "1"); go("scanner"); };
+$("#aboutLink").onclick = () => go("about");
+$("#nfScan").onclick = goScanner;
+$("#nfEntry").onclick = () => openEntry(nfCodeVal);
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) { stopCamera(); stopSpeech(); }
+  else if (stack[stack.length - 1] === "scanner") startCamera();
+});
+applyLang();
+const first = localStorage.getItem("gf_seen") ? "scanner" : "welcome";
+stack = [first]; history.replaceState({s:first}, ""); show(first);
+</script>
+</body>
+</html>
